@@ -934,7 +934,7 @@ public class StreamingResultSet implements ResultSet, Externalizable {
 
     public void afterLast() throws SQLException {
         // Request all remaining Row-Packets
-        while(requestNextRowPacket()) ;
+        while(requestNextRowPacket()) {}
         _cursor = _rows.size();
         _actualRow = null;
     }
@@ -952,7 +952,7 @@ public class StreamingResultSet implements ResultSet, Externalizable {
     public boolean last() throws SQLException {
         try {
             // Request all remaining Row-Packets
-            while(requestNextRowPacket()) ;
+            while(requestNextRowPacket()) {}
             _cursor = _rows.size() - 1;
             _actualRow = _rows.get(_cursor);
             return true;

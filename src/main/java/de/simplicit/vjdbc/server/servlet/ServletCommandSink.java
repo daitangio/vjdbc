@@ -91,11 +91,11 @@ public class ServletCommandSink extends HttpServlet {
                         new FileInputStream(ctx.getRealPath(configVariables));
                 }
 
-                if(configVariablesInputStream == null) {
-                    String msg = "Configuration-Variables " + configVariables + " not found !";
-                    _logger.error(msg);
-                    throw new ServletException(msg);
-                }
+//                if(configVariablesInputStream == null) {
+//                    String msg = "Configuration-Variables " + configVariables + " not found !";
+//                    _logger.error(msg);
+//                    throw new ServletException(msg);
+//                }
 
                 configVariablesProps = new Properties();
                 configVariablesProps.load(configVariablesInputStream);
