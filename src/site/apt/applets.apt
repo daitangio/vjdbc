@@ -1,0 +1,108 @@
+Using VJDBC in Applets
+
+  Using VJDBC in applets requires some additional configuration and re-packaging but it's nevertheless quite easy. So imagine you have to write a small quiz applet for your company where the winner will get a nice price at the end of the year.
+
+The Database
+
+  For the sake of simplicity you want to save the data in a Microsoft Access database. You design the following tables:
+
+*---------------------*-------*
+| Question |                  |
+*---------------------*-------*
+| Id (Primary Key) | AutoIncrement |
+*---------------------*-------*
+| Question | VarChar(255)     |
+*---------------------*-------*
+| Answer1 | VarChar(255)      |
+*---------------------*-------*
+| Answer2 | VarChar(255)      |
+*---------------------*-------*
+| Answer3 | VarChar(255)      |
+*---------------------*-------*
+| Answer4 | VarChar(255)      |
+*---------------------*-------*
+| CorrectAnswer | Integer     |
+*---------------------*-------*
+
+========
+
+*---------------------*-------*
+| Answer |                    |
+*---------------------*-------*
+| User (Primary Key) | VarChar(50) |
+*---------------------*-------*
+| CorrectAnswers | Integer    |
+*---------------------*-------*
+
+  Put some questions in the "Question"-Table.
+
+The Applet
+
+  Now lets code the applet. It will first request a username and then proceed to get the answers from the user. After each question the user entry in the database will be updated. Finally there will be a highscore table displayed.
+
+  You'll find the complete source code here. I think it's quite self-explaining but I'll comment the sections which concern the VJDBC connections.
+
+  After the class definition we'll start with overriding the init() method of Applet. First we try to load the VJDBC-Driver:
+
++----------------------------------------------------------------+
+public void init() \{
+  try \{
+    Class.forName("de.simplicit.vjdbc.VirtualDriver").newInstance();
+    ...
++----------------------------------------------------------------+
+
+  The code to get a JDBC-Connection is in a separate method:
+
++----------------------------------------------------------------+
+private Connection openConnection() throws SQLException \{
+   URL codebase = getCodeBase();
+   String vjdbcurl = "jdbc:vjdbc:servlet:" + codebase.toString() + "vjdbc,QuizDB";
+   return DriverManager.getConnection(vjdbcurl);
+\}
++----------------------------------------------------------------+
+
+  Here you can see that the URL is constructed from the codebase of the webpage plus the mapping name of the VJDBC servlet (which is "vjdbc").
+
+The Deployment
+
+  Beside the QuizApplet the browser VM needs the VJDBC client classes and the jars they depend on. This can be achieved by repackaging the necessary classes with an Ant task. Take a look at the build.xml:
+
++----------------------------------------------------------------+
+<target name="generateAppletArchive" depends="generateJars">
+  <delete file="deploy/vjdbc_applet.jar"/>
+  <copy todir="${tmpdir}/applet">
+    <fileset dir="${tmpdir}/class" includes="de/**/QuizApplet*"/>
+  </copy>
+  <unjar src="lib/vjdbc.jar" dest="${tmpdir}/applet"/>
+  <unjar src="lib/commons-logging.jar" dest="${tmpdir}/applet"/>
+  <jar basedir="${tmpdir}/applet" destfile="deploy/vjdbc_applet.jar"/>
+</target>
++----------------------------------------------------------------+
+
+  With this task the QuizApplet will be packaged together with the two jars which will be needed on the client side. Place vjdbc_applet.jar in the directory of your web application and insert the following code in your HTML page:
+
++----------------------------------------------------------------+
+<BODY>
+This small applet shows how VJDBC can be used to access a JDBC datasource over HTTP.<P>
+<APPLET CODE="de.simplicit.vjdbc.test.QuizApplet" ARCHIVE="vjdbc_applet.jar" WIDTH=500 HEIGHT=300>
+</APPLET>
+</BODY>
++----------------------------------------------------------------+
+
+  The directory structure of your webapp should look like this:
+
++----------------------------------------------------------------+
+webapps (dir)
+  vjdbc_servlet (dir)
+     META-INF (dir)
+        MANIFEST.MF
+     WEB-INF (dir)
+        web.xml
+        lib (dir)
+          ... VJDBC-Jars ...
+     index.html
+     applet.html
+     vjdbc_applet.jar
++----------------------------------------------------------------+
+
+  The VJDBC-Servlet must be configured like here.

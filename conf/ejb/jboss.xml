@@ -1,0 +1,13 @@
+<jboss>
+	<secure>false</secure>
+	<enterprise-beans>
+		<session>
+			<ejb-name>VJdbc</ejb-name>
+			<jndi-name>ejb/VJdbc</jndi-name>
+			<resource-ref>
+				<res-ref-name>jdbc/database</res-ref-name>
+				<jndi-name>java:/VJdbcTest</jndi-name>
+			</resource-ref>
+		</session>
+	</enterprise-beans>
+</jboss>

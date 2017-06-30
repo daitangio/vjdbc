@@ -1,0 +1,237 @@
+VJDBC Change-Log
+================
+
+FEA = Implemented feature
+BUG = Resolved bug
+OPT = Optimization
+CLN = Cleanup/Refactoring
+OTH = Other
+
+Release 1.7.0 (06 Feb 2010)
+---------------------------
+* FEA: Upgraded source base to JDBC4 and JDK 1.6
+* BUG: Fixed bug in the metadata classes which routed a ReflectiveCommand to the wrong server side JDBC class
+* FEA: Added the ability to manually insert a JDBC object into the server side connection so more than just an id can be returned to the client
+* OTH: upgraded to Apache Commons DBCP 1.4 (from 1.2.1)
+
+Release 1.6.5 (05 Feb 2007)
+---------------------------
+* FEA: ServletCommandSink now searches the whole classpath for the configuration resource
+* FEA: Using Doug Lea's PooledExecutor for asynchronously reading of remaining ResultSets instead
+       of starting a thread each time
+* FEA: PreparedStatement.set<...>Stream methods accept -1 as the length parameter. It is then
+       replaced by the actual length of the InputStream read by VJDBC
+* FEA: Support for Oracle's ROWID type
+* FEA: Added support for variable expansion in configuration file (thx to Chris Campbell), see
+       reference for details
+* BUG: Fixed possible race condition in ResultSetHolder (thx to John V. Sichi)
+* BUG: Fixed server-side NPE in finalizer of StreamingResultSet (thx again to John V. Sichi)
+* OTH: Changed contact email address to vjdbc@gmx.net
+
+Release 1.6.4 (19 Aug 2006)
+---------------------------
+* FEA: Jakarta-HttpClient can be used as a drop-in replacement for the JDK classes. See chapter
+       'Client-Side Properties' for more information.
+* FEA: HTTP-Request can now be enhanced with own request headers by implementing a RequestEnhancer that
+       is called back before the actual HTTP-Request is made. See chapter 'Using Request-Enhancers' in
+       the reference documentation.
+* FEA: In Servlet-Mode the location of the config resource can be configured by setting the init 
+       parameter 'config-resource' in the web.xml of the VJDBC-Servlet.
+* FEA: RMI-Configuration now supports the remotingPort-Attribute to specify which server port is used by
+       the remote objects to listen for incoming client requests.
+* FEA: Statement.cancel() can be called asynchronously to interrupt running queries (if supported by the
+       native database driver)
+* FEA: VJDBC-URLs now can use other split characters than comma
+* BUG: Vendor-specific SQLExceptions were sliced of their information (thx again to John V. Sichi)
+* BUG: Setting scale of BigDecimal in the StreamingResultSet
+* CLN: RMI-Configuration attribute 'port' was renamed to 'registryPort' because of the mixup with the new
+       'remotingPort' attribute. 'port' is still supported to prevent breaking changes.
+* CLN: Upgraded to the current Jakarta-Commons libraries
+
+Release 1.6.3 (08 Apr 2006)
+---------------------------
+* FEA: Now using SVN-Support of SourceForge
+* CLN: Classes in de.simplicit.vjdbc are now public. Some tools (i.e. Spring) seem to have problems when 
+       they access these classes via reflection without using the public JDBC-Interfaces (thx to Anton Keks)
+* CLN: CommandSinks now must support a close-Method for cleanup
+* BUG: New Shutdown-Hook destroys CommandProcessor-Singleton
+* BUG: StreamingResultSet.getTimestamp(int columnIndex, Calendar cal) caused ArrayIndexOutOfBoundsException
+       because columnIndex was corrected twice
+* BUG: VirtualStatement.executeQuery() didn't remember ResultSet, thus calls to getResultSet() returned null
+* BUG: PreparedStatementUpdateCommand didn't work with Null-Parameters (i. e. pure Out-Parameters of Stored-Procs)
+
+Release 1.6.2 (10 Dec 2005)
+---------------------------
+* BUG: Multiple execution of Statement.execute(sql) + Statement.getResultSet() returned empty ResultSet
+* BUG: ServletCommandSinkClient didn't accept null-UIDs which caused the KeepAliveTimerTask to terminate
+       (thx to dbaldes)
+* BUG: Initialization throws a ConfigurationException when connection pooling is turned on and no 
+       user/password is provided. This makes VJDBC more secure as otherwise user-provided accounts were 
+       accidently shared via connection pooling.
+* CLN: Multiple initialization of VJDBC doesn't throw an exception anymore but emits a warning and ignores
+       the second initialization. This makes it easier for server developers to test their stuff without
+       stopping the VM.
+* CLN: Changed the behaviour of Query-Filters; when a statement doesn't match any filter it isn't executed
+       anymore because this allowed malicious statements to accidently get through the filter chain. The rule
+       now is: if at least one filter is specified the statement MUST match one of the filters.
+
+Release 1.6.1 (11 Oct 2005)
+---------------------------
+* BUG: Null-Check in PreparedStatementExecuteCommand, parameters can be null in the case of OUT
+       parameters of CallableStatments
+* BUG: Derived SQLExceptions caused endless recursion in SQLExceptionHelper
+* BUG: CallableStatement.getObject() can return a ResultSet which must be handled using a StreamingResultSet
+* BUG: Fixed bug in BigDecimal handling of StreamingResultSet
+* OPT: Minor adjustments in Build-File
+* OPT: Removed obsolete class StatementCopyCommand
+
+Release 1.6 (24 Aug 2005)
+-------------------------
+* FEA: The Orphaned-Connection-Collector-Task (aka OCCT) can now be configured with the new <occt>-Tag
+* OPT: Unified Exception-Handling
+* OPT: Changed synchronization on server-side connection entries to be more scalable
+* OPT: Other minor changes
+* BUG: Fixed minor error in a logging statement when the connection for a command couldn't be found
+* BUG: Reworked Exception-Handling in Servlet-Sink completely to support meaningful SQLExceptions on the
+       client-side
+
+Release 1.5 (26 Jun 2005)
+-------------------------
+* BUG: The asynchronous reading of RowPackets didn't work correctly when the subsequent 
+       NextRowPacket-Request was made before the reading of the RowPacket was finished (thx
+       to Anton Keks for pointing me to this problem).
+* BUG: Methods first() and last() on an empty StreamingResultSet caused NullPointer-Exception
+* OPT: Changed SQLException handling to provide more information for the client
+* OPT: Some small optimizations
+* OPT: Removed "Average Time in Commands" statistics (didn't make any sense because of the
+       different kinds of commands)
+
+Release 1.4 (11 Jun 2005)
+-------------------------
+* OPT: RowPackets are now loaded asynchronously. While the client processes a RowPacket the
+       server reads the next RowPacket which can be delivered instantly with the next Remote-Call.
+* OPT: Changed expensive instanceof-Calls in StreamingResultset into switch-Statements
+* FEA: Implemented getRef()-API
+* FEA: Improved support for ad-hoc conversions within StreamingResultSet (thx to Erik Jõgi)
+* FEA: Long running database operations were accidently terminated by the OrphanedConnectionCollectorTask.
+       This is now prevented by marking the connection as active.
+* FEA: Now it can be specified which client-side system properties are delivered to the server for
+       logging purposes. You must pass a VJdbc-Property with the getConnection-Method (take a look
+       at chapter 3.4 of the reference documentation)
+* CLN: Removed obsolete classes
+* BUG: CallableStatementGetObjectCommand didn't handle Null-Results correctly
+* BUG: Resolved Named-Queries were sometimes checked against Query-Filters
+
+Release 1.3 (26 Mar 2005)
+-------------------------
+* BUG: Fixed serious bug in RowPacket implementation which caused exceptions when the size
+       of a ResultSet wasn't a multiple of RowPacket-Size (thx to Blas Rodriguez Somoza)
+* OPT: Switched the remaining Serializable classes (Parameters, ResultSetMetaData) to 
+       Externalizable usage
+* FEA: Configuration was extended to provide parameters for the underlying DBCP-Pooling
+       (see reference, chapter 3.2 for details)
+* CLN: Small corrections to reference guide
+
+Release 1.2.1 (12 Mar 2005)
+---------------------------
+* BUG: Fixed small bug in JavaVersionInfo that could cause exceptions when using JDK 1.5
+
+Release 1.2 (27 Feb 2005)
+-------------------------
+* OPT: reworked RowPacket implementation completely: data isn't delivered as rows with
+       mixed types but as columns with fixed types. This results in a reduction of data
+       to transport and much faster serialisation when primitive types are part of the 
+       ResultSet. Memory consumption seems also to be much better as bigger blocks of
+       continous memory are allocated instead of many small objects.
+* OPT: HashMaps in StreamingResultSet were replaced by String arrays which are faster
+       during serialization
+* OPT: removed Tracing-Possibility in DestroyCommand, was too expensive
+* OPT: SerializableTransport is now Externalizable (faster than Serializable)
+* BUG: Support for Types.BOOLEAN
+* BUG: Fixed typo in PreparedStatementExecuteCommand
+* BUG: Fixed Quickstart-Documentation
+
+Release 1.1 (14 Jan 2005)
+-------------------------
+* FEA: PreparedStatement.execute() is now supported
+* CLN: Removed object pooling for serialization; today's JVM are very good at reducing
+       the costs for object creation
+* BUG: In some rare cases ReflectiveCommand didn't use the correct JDBC interface
+       class for introspection
+
+Release 1.0 (06 Jan 2005)
+-------------------------
+* FEA: Implemented support for DataSource API (see config-element dataSourceFactory)
+* FEA: The calling context of orphaned objects like Statements or ResultSets can 
+       now be traced back to the origin. That way potential resource "leaks" caused by 
+       not closing JDBC objects can be traced easily.
+* FEA: User/Password for the database connection can now be specified in the configuration.
+       The client mustn't provide them anymore but instead use a custom login mechanism or
+       no login at all.
+* FEA: Named-Queries for replacing real SQL queries with string identifiers
+* FEA: Query-Filters can filter the SQL-Statements using a chain of regular expressions.
+       With Query-Filters malicious statements (drop table, etc.) can be rejected by VJDBC.
+* FEA: extended validation of the Connection-Configuration
+* FEA: ResultSetMetaData can be optionally prefetched
+* BUG: Statement.getConnection() now returns the VJDBC-Connection object instead
+       of trying to get the connection from the remote object
+* BUG: Some methods of the JDBC-Interface didn't pass their parameters to the server
+* BUG: DestroyCommand used to call close() method directly on the target objects instead of
+       using the JDBC interfaces for the Reflection-Call
+* OPT: Replaced String-UID with Integer-UID, easier to read in the logfiles and probably little
+       bit faster to serialize
+* CLN: Added missing serial ids to some serializable classes
+* CLN: Removed obsolete method 'lastProcessedCommand' of DecoratedCommandSink
+* CLN: Extended logging
+* CLN: Updated all third-party-libraries to their current version
+
+Release 0.9.0 (16 May 2004)
+---------------------------
+* Speed improvements
+    - switched from standard Serialization to Externalizable-Usage
+    - UID-Objects for C/S exchange now more compact
+    - ResultSetMetaData will now only be delivered on-demand
+* Redesign of configuration
+    - can now be done completely programmatically with a bunch of Configuration objects
+    - configuration files now in XML format (using Jakarta-Digester)
+    - multiple Connections can now be served by a VJDBC server
+    - Properties (compression, rowpacketsize, login, ...) can now be handled per Connection
+    - Client doesn't need to know all those server properties anymore
+* BUG: forgot cleaning up resources in the Servlet-Sink (thx to Heiko Wenzel)
+* BUG: Auto-Commit-Handling was wrong
+* BUG: finalize() of VirtualPreparedStatement was obsolete (and wrong)
+* BUG: ReflectiveCommand now uses the java.sql-Interfacetypes for calling the reflected
+       methods instead of calling directly the implementing classes (got IllegalAccessErrors
+       from Oracle-Driver)
+* FEA: ResultSets now contain only the last requested RowPacket when the ResultSet-Type
+       is forward-only. Otherwise the client could run out of memory in case of big
+       ResultSets (thx to Hank Drews)
+* FEA: ResultSet.getBinaryStream() implemented, Charset for String-to-byte[]-Conversion
+       can be specified on server-side (defaults to "ISO-8859-1" which is used i. e. in
+       MySQL 4.0)
+* FEA: Support for SQL-Types Array and Struct improved
+* VJDBC passes all unit tests of Hibernate 2.1.2 (VJDBC + MySQL as backend database)
+* Some small bugfixes and internal cleanup
+
+Release 0.8.3 (08 February 2004)
+--------------------------------
+* Switched from Log4J to Commons-Logging
+* New property vjdbc.database.allowcustom: with this flag set to false you can prevent a
+    client from connecting to a database other than the one specified by vjdbc.database
+* Support for connection pooling with Jakarta-DBCP; use vjdbc.connectionpooling for turning
+    it on/off (default is on)
+* Moved all server-specific classes and interfaces in a separate package called
+    de.simplicit.vjdbc.server; adjusted build to generate separate jars, too
+* Reduced size of distribution by stripping down the J2EE and Rowset jars to the
+    necessary classes
+* Reworked Servlet-Client a little bit
+
+Release 0.8.2 (06 January 2004)
+-------------------------------
+* BUG: DatabaseMetaData.getIndexInfo() caused NoSuchMethodException (thx to Fredrik Bertilsson)
+* FEA: RMI-ConnectionServer can now be instantiated and VJdbcProperties can be initialized
+       with own PropertiesLoader-Implementation (thx again to Fredrik Bertilsson)
+
+Release 0.8.1 (04 January 2004)
+-------------------------------
+Initial release.

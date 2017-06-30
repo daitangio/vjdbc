@@ -1,0 +1,59 @@
+Quickstart
+
+  This very simple sample shows how to access a Microsoft Access database remotely with VJDBC. You should be familiar with creating Access databases and registering them as ODBC-Datasources in your Windows system.
+
+
+  1. Normally you would create a JDBC-Connection to an ODBC-Datasource called testdb this way:
+
++----------------------------------------------------------------+
+Class.forName("sun.jdbc.odbc.JdbcOdbcDriver").newInstance();
+Connection conn = DriverManager.getConnection("jdbc:odbc:testdb");
+Statement stmt = conn.createStatement();
+/* make JDBC calls here */
++----------------------------------------------------------------+
+
+
+  2. For using VJDBC you only need to change the driver class and the JDBC-String:
+
++----------------------------------------------------------------+
+Class.forName("de.simplicit.vjdbc.VirtualDriver").newInstance();
+Connection conn = DriverManager.getConnection("jdbc:vjdbc:rmi://localhost:2000/VJdbc,testdb");
+Statement stmt = conn.createStatement();
+/* make JDBC calls here */
++----------------------------------------------------------------+
+
+  As you can see the JDBC-String doesn't refer directly to the ODBC-Datasource anymore but specifies the location (localhost:2000) where a registered RMI-Object (VJdbc) is waiting for connections. For more information about the JDBC-String please jump directly to the reference.
+  Important ! You need two additional JARs in your classpath: vjdbc.jar and commons-logging.jar.
+
+
+  3. Before you can start the RMI-Server you must create a small XML file which contains the information about the ODBC-Datasource and the JDBC-Driver. So create a file called vjdbc_jdbcodbc.xml with this content:
+
++----------------------------------------------------------------+
+<vjdbc-configuration>
+  <connection id="testdb" driver="sun.jdbc.odbc.JdbcOdbcDriver" url="jdbc:odbc:testdb"/>
+</vjdbc-configuration>
++----------------------------------------------------------------+
+
+  That's it ! There are some more properties for configuration but the default values are sufficient for now.
+
+
+  4. Now you must start the RMI-Server (don't forget to specify the previously created XML file as the one and only argument), use the JAR-Files from the lib-directory:
+
++----------------------------------------------------------------+
+java -classpath
+vjdbc.jar;
+vjdbc_server.jar;
+commons-beanutils-core.jar;
+commons-collections-3.2.jar;
+commons-dbcp-1.2.1.jar;
+commons-digester-1.7.jar;
+commons-logging-1.1.jar;
+commons-pool-1.3.jar;
+jakarta-oro-2.0.8.jar;
+log4j-1.2.8.jar;
+de.simplicit.vjdbc.server.rmi.ConnectionServer
+vjdbc_jdbcodbc.xml
++----------------------------------------------------------------+
+
+
+  5. Finally you can start your client program ...

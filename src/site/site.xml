@@ -1,0 +1,21 @@
+<project xmlns="http://maven.apache.org/DECORATION/1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd" name="VJDBC">
+  <publishDate position="right" />
+  <version position="right" />
+  <body>
+    <menu name="Home">
+      <item name="Overview" href="overview.html" />
+      <item name="Quickstart" href="quickstart.html" />
+      <item name="Reference" href="reference.html" />
+      <item name="Performance" href="performance.html" />
+      <item name="Applets" href="applets.html" />
+<!--      <item name="FAQ" href="faq.html" /> -->
+      <item name="Contact" href="contact.html" />
+    </menu>
+    <links>
+      <item name="Downloads" href="http://vjdbc.sourceforge.net/documentation/downloads.htm" />
+    </links>
+    <menu ref="reports" />
+  </body>
+</project>

@@ -1,0 +1,56 @@
+Performance-Comparisons between Type-3-Drivers
+
+  Type-3-Drivers claim that they make a JDBC-Datasource transparently available over network boundaries. But this only makes sense when the performance is sufficient for the usage scenarios. It can be dangerous to develop with a native JDBC driver and then switch to a Type-3-Driver only to recognize that the performance drops dramatically and renders the application unusable. VJDBC is highly optimized and configurable for these scenarios.
+  Besides VJDBC there are some more Type-3-Drivers, both commercial and free. For the comparison the products RmiJdbc (free) and Duality (shareware) were chosen.
+  No special performance tests were written. The Hibernate persistence framework has an extensive set of unit tests which test both functionality and performance. I simply used the Hibernate unit tests (v2.1.8) in combination with HSQL-DB 1.7.3 and measured each test with
+
+  * HSQL-DB Native-Driver
+
+  * VJDBC 1.2
+
+  * Duality (W1R044-01 A4, Trial Version)
+
+  * RmiJdbc 3.3
+
+ Below you see the results of these tests (15 tests) sorted descending by the time that the Native-Driver needed. Each column displays the factor which the Type-3-Driver needed to complete the test compared to the Native-Driver. As you can see the VJDBC performance is quite close to the Native-Driver while Duality and RmiJdbc perform 10 times worse than VJDBC in the longest running test.
+
+  All tests run locally to prevent side effects from networking. The compression feature of VJDBC was deactivated.
+
+[images/performance.gif]
+
+
+The Raw Numbers
+
+  Here the results of each test (values are in milliseconds). The longest running test FooBarTest didn't run with RmiJdbc because of an Out-Of-Memory-Exception after a long delay with 100% CPU usage.
+
+*--------------*-------*-------*-------*-------*
+ | HSQL-DB      | VJDBC 1.2 | Duality | RmiJdbc
+*--------------*-------*-------*-------*-------*
+ FooBarTest   | 11978 | 31465 | 319239 | -
+*--------------*-------*-------*-------*-------*
+ ParentChildTest | 4086 | 6509 | 29382 | 63772
+*--------------*-------*-------*-------*-------*
+ FumTest | 3625 | 4897 | 13048 | 18647
+*--------------*-------*-------*-------*-------*
+ ODMGTest | 3164 | 3956 | 6810 | 5448
+*--------------*-------*-------*-------*-------*
+ MultiTableTest | 2393 | 4617 | 11967 | 25316
+*--------------*-------*-------*-------*-------*
+ MasterDetailTest | 2264 | 3205 | 9815 | 28491
+*--------------*-------*-------*-------*-------*
+ SQLLoaderTest | 1913 | 2503 | 6660 | 12638
+*--------------*-------*-------*-------*-------*
+ SQLFunctionsTest | 1843 | 2203 | 5217 | 8141
+*--------------*-------*-------*-------*-------*
+ ABCProxyTest | 1752 | 2874 | 5878 | 6099
+*--------------*-------*-------*-------*-------*
+ SessionCacheTest | 1523 | 1603 | 2464 | 1993
+*--------------*-------*-------*-------*-------*
+ ABCTest | 1482 | 1732 | 2784 | 2574
+*--------------*-------*-------*-------*-------*
+ QueryByExampleTest | 1362 | 1592 | 3045 | 3495
+*--------------*-------*-------*-------*-------*
+ BlobClobTest | 1142 | 1312 | 1532 | 1592
+*--------------*-------*-------*-------*-------*
+ CacheTest | 611 | 601 | 701 | 621
+*--------------*-------*-------*-------*-------*

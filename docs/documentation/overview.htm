@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Untitled Document</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="../vjdbc.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="headerfont">
+<p>Summary</p>
+<p class="textfont">VJDBC (&quot;Virtual JDBC&quot;) is a JDBC type 3 driver which 
+  provides a client-server model for remote access of JDBC datasources over different 
+  network protocols.</p>
+<p align="center" class="textfont"><img src="../img/scenario1.gif" width="643" height="175"></p>
+<p>Overview</p>
+<p class="textfont">Accessing JDBC-Datasources over networks is sometimes difficult. 
+  The JDBC specification defines four types of JDBC drivers. A type 3 driver is 
+  a net protocol full Java driver; it converts JDBC calls to a database-independent 
+  net protocol, which is then translated into the database protocol by the server.</p>
+<p class="textfont">It depends heavily on the database vendor or 3rd-party vendors 
+  if there is a type 3 driver available for a specific database. Furthermore these 
+  drivers mostly need an additional daemon process on the server which can serve 
+  calls from the net protocol. The configuration of this daemon process is also 
+  vendor-specific. Most of them require direct socket connections on some custom 
+  ports which is crucial in protected environments behind firewalls. Finally if 
+  you want to change the database the game will start from the beginning.</p>
+<p class="textfont">VJDBC is a vendor-agnostic type 3 JDBC-Driver with which you 
+  can remotely access every JDBC-Database in an efficient manner. Due to its command-oriented 
+  design different networking protocols can be supported quite easily.</p>
+<p class="textfont">There is a similar open source project called <a href="http://rmijdbc.objectweb.org" target="_blank">RmiJdbc</a>. 
+  The main difference between VJDBC and RmiJdbc is that RmiJdbc exposes the complete 
+  interface of the JDBC-Objects via RMI, so every call on an JDBC-Object will 
+  go over the network. This can be a major performance killer. VJDBC uses a different 
+  approach with command objects and a very thin remote interface.</p>
+<blockquote> 
+  <p>&nbsp;</p>
+</blockquote>
+</body>
+</html>

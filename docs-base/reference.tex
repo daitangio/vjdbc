@@ -1,0 +1,1015 @@
+\documentclass[10pt,a4paper,english]{article}
+\usepackage{babel}
+\usepackage{ae}
+\usepackage{aeguill}
+\usepackage{shortvrb}
+\usepackage[latin1]{inputenc}
+\usepackage{tabularx}
+\usepackage{longtable}
+\setlength{\extrarowheight}{2pt}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{multirow}
+\usepackage{ifthen}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\usepackage[DIV12]{typearea}
+%% generator Docutils: http://docutils.sourceforge.net/
+\newlength{\admonitionwidth}
+\setlength{\admonitionwidth}{0.9\textwidth}
+\newlength{\docinfowidth}
+\setlength{\docinfowidth}{0.9\textwidth}
+\newlength{\locallinewidth}
+\newcommand{\optionlistlabel}[1]{\bf #1 \hfill}
+\newenvironment{optionlist}[1]
+{\begin{list}{}
+  {\setlength{\labelwidth}{#1}
+   \setlength{\rightmargin}{1cm}
+   \setlength{\leftmargin}{\rightmargin}
+   \addtolength{\leftmargin}{\labelwidth}
+   \addtolength{\leftmargin}{\labelsep}
+   \renewcommand{\makelabel}{\optionlistlabel}}
+}{\end{list}}
+\newlength{\lineblockindentation}
+\setlength{\lineblockindentation}{2.5em}
+\newenvironment{lineblock}[1]
+{\begin{list}{}
+  {\setlength{\partopsep}{\parskip}
+   \addtolength{\partopsep}{\baselineskip}
+   \topsep0pt\itemsep0.15\baselineskip\parsep0pt
+   \leftmargin#1}
+ \raggedright}
+{\end{list}}
+% begin: floats for footnotes tweaking.
+\setlength{\floatsep}{0.5em}
+\setlength{\textfloatsep}{\fill}
+\addtolength{\textfloatsep}{3em}
+\renewcommand{\textfraction}{0.5}
+\renewcommand{\topfraction}{0.5}
+\renewcommand{\bottomfraction}{0.5}
+\setcounter{totalnumber}{50}
+\setcounter{topnumber}{50}
+\setcounter{bottomnumber}{50}
+% end floats for footnotes
+% some commands, that could be overwritten in the style file.
+\newcommand{\rubric}[1]{\subsection*{~\hfill {\it #1} \hfill ~}}
+\newcommand{\titlereference}[1]{\textsl{#1}}
+% end of "some commands"
+\title{VJDBC Reference}
+\author{}
+\date{}
+\hypersetup{
+pdftitle={VJDBC Reference},
+pdfauthor={Michael Link}
+}
+\raggedbottom
+\begin{document}
+\maketitle
+
+%___________________________________________________________________________
+\begin{center}
+\begin{tabularx}{\docinfowidth}{lX}
+\textbf{Author}: &
+	Michael Link \\
+\textbf{Version}: &
+	1.5.1 (13.08.2005) \\
+\end{tabularx}
+\end{center}
+
+\setlength{\locallinewidth}{\linewidth}
+\hypertarget{contents}{}
+\pdfbookmark[0]{Contents}{contents}
+\subsubsection*{~\hfill Contents\hfill ~}
+\begin{list}{}{}
+\item {} \href{\#introduction}{1~~~Introduction}
+\begin{list}{}{}
+\item {} \href{\#what-is-vjdbc}{1.1~~~What is VJDBC ?}
+
+\item {} \href{\#features}{1.2~~~Features}
+
+\item {} \href{\#compatibility}{1.3~~~Compatibility}
+
+\end{list}
+
+\item {} \href{\#supported-protocols}{2~~~Supported Protocols}
+\begin{list}{}{}
+\item {} \href{\#rmi}{2.1~~~RMI}
+
+\item {} \href{\#http-s-using-servlets}{2.2~~~HTTP(S) using Servlets}
+
+\item {} \href{\#ejb-mode}{2.3~~~EJB-Mode}
+
+\end{list}
+
+\item {} \href{\#configuration-usage}{3~~~Configuration {\&} Usage}
+\begin{list}{}{}
+\item {} \href{\#id1}{3.1~~~Introduction}
+
+\item {} \href{\#xml-elements}{3.2~~~XML-Elements}
+
+\item {} \href{\#programmatic-configuration}{3.3~~~Programmatic Configuration}
+
+\item {} \href{\#client-side-properties}{3.4~~~Client-Side Properties}
+
+\item {} \href{\#advanced-configuration}{3.5~~~Advanced configuration}
+\begin{list}{}{}
+\item {} \href{\#using-datasources}{3.5.1~~~Using DataSources}
+
+\item {} \href{\#using-loginhandlers}{3.5.2~~~Using LoginHandlers}
+
+\item {} \href{\#using-named-queries}{3.5.3~~~Using Named-Queries}
+
+\item {} \href{\#using-query-filters}{3.5.4~~~Using Query-Filters}
+\begin{list}{}{}
+\item {} \href{\#combining-named-queries-and-query-filters}{3.5.4.1~~~Combining Named-Queries and Query-Filters}
+
+\end{list}
+
+\end{list}
+
+\item {} \href{\#logging}{3.6~~~Logging}
+
+\end{list}
+
+\item {} \href{\#vendor-specific-informations}{4~~~Vendor-Specific informations}
+\begin{list}{}{}
+\item {} \href{\#oracle-9i}{4.1~~~Oracle 9i}
+
+\item {} \href{\#db2-8-2}{4.2~~~DB2 8.2}
+
+\end{list}
+
+\end{list}
+
+
+
+%___________________________________________________________________________
+
+\hypertarget{introduction}{}
+\pdfbookmark[0]{1~~~Introduction}{introduction}
+\section*{1~~~Introduction}
+
+
+%___________________________________________________________________________
+
+\hypertarget{what-is-vjdbc}{}
+\pdfbookmark[1]{1.1~~~What is VJDBC ?}{what-is-vjdbc}
+\subsection*{1.1~~~What is VJDBC ?}
+
+VJDBC (Virtual JDBC) is a JDBC type 3 driver which provides a client-server model for remote access of JDBC datasources over different   network protocols.
+
+
+%___________________________________________________________________________
+
+\hypertarget{features}{}
+\pdfbookmark[1]{1.2~~~Features}{features}
+\subsection*{1.2~~~Features}
+\begin{itemize}
+\item {} 
+High-Speed
+\begin{quote}
+
+Communication to the server and delivering of the results are extremely
+optimized for highest serialization speed.
+\end{quote}
+
+\item {} 
+Command-Pattern
+\begin{quote}
+
+Most method calls on VJDBC-Objects are wrapped in Command-Objects which will 
+then be sent to the server-component for processing over \textbf{Command-Sinks}. 
+A Command-Sink has a very lean interface (actually two methods !) so its very 
+easy to provide new Command-Sink-Implementations for other protocols (i.e. 
+SOAP, XML-RPC ...).
+\end{quote}
+
+\item {} 
+Different Command-Sinks provided
+\begin{quote}
+
+There are actually three Command-Sink-Implementations in the VJDBC-Package: 
+RMI, HTTP(S) and EJB. The latter ones are somewhat experimental because they 
+don't bother about clustering, EJB container transactions and so on.
+\end{quote}
+
+\item {} 
+Transparent compression
+\begin{quote}
+
+Data is transparently compressed to provide good performance in low-bandwidth 
+environments.
+\end{quote}
+
+\item {} 
+Parameter batching
+\begin{quote}
+
+Parameters for prepared statements and batch updates will be collected on 
+the client side until the statement is finally executed.
+\end{quote}
+
+\item {} 
+Streaming ResultSets
+\begin{quote}
+
+JDBC-ResultSets can be very large (intentionally or unintentionally). To reduce 
+network load and thus provide a faster response ResultSets can be split up 
+in multiple sequential row packets by a definable packet size.
+\end{quote}
+
+\item {} 
+Caching
+\begin{quote}
+
+Some data doesn't change over the lifetime of a JDBC-Object (i.e. the metadata 
+of a PreparedStatement). Such data will be cached on the client-side to reduce 
+network load for repeated calls.
+\end{quote}
+
+\item {} 
+Checking for orphaned connections
+\begin{quote}
+
+A timer task frequently checks for orphaned connections, there are no dangling 
+connections.
+\end{quote}
+
+\item {} 
+Connection Pooling
+\begin{quote}
+
+VJDBC optionally uses the Jakarta-DBCP-Package for efficient connection pooling.
+\end{quote}
+
+\item {} 
+Named-Queries {\&} Query-Filters
+\begin{quote}
+
+To make the client-server connection more secure VJDBC can be configured to only
+allow specific queries. Additionally queries can be filtered through regular
+expressions.
+\end{quote}
+
+\end{itemize}
+
+
+%___________________________________________________________________________
+
+\hypertarget{compatibility}{}
+\pdfbookmark[1]{1.3~~~Compatibility}{compatibility}
+\subsection*{1.3~~~Compatibility}
+
+VJDBC implements the complete JDBC-API of J2SE 1.4, including SavePoints, Batch-Updates and so on. It certainly depends on the used database drivers if these recent features are available.
+
+VJDBC-ResultSets are read-only, they are not updatable. You will get UnsupportedOperationExceptions when you call the update...() methods. Because updatable ResultSets IMHO aren't use very often (indeed they're quite exotic), this is only a minor drawback.
+
+
+%___________________________________________________________________________
+
+\hypertarget{supported-protocols}{}
+\pdfbookmark[0]{2~~~Supported Protocols}{supported-protocols}
+\section*{2~~~Supported Protocols}
+
+
+%___________________________________________________________________________
+
+\hypertarget{rmi}{}
+\pdfbookmark[1]{2.1~~~RMI}{rmi}
+\subsection*{2.1~~~RMI}
+
+Using VJDBC with RMI is almost completely described in the quickstart tutorial, please first take a look at this example to get an idea how RMI access works.
+
+To use VJDBC in RMI-Mode the JDBC connection string must have a specific layout:
+\begin{quote}
+
+\texttt{jdbc:vjdbc:rmi:<RMI-URI>,<Connection-Id>}
+\end{quote}
+
+The RMI-URI contains the reference to the RMI-Registry and the name of the RMI-Object we want to get a reference to. When you start the RMI-Server without additional parameters you can reach the RMI-Object with the following string:
+\begin{quote}
+
+\texttt{jdbc:vjdbc:rmi://localhost:2000/VJdbc,testdb}
+\end{quote}
+
+The last part {\textless}Connection-Id{\textgreater} is an identifier for the JDBC connection. There can be any number of connection definitions so all clients need to identify the connection they desire to access.
+
+The server-component can now be started with
+\begin{quote}
+
+\texttt{java -classpath vjdbc.jar;vjdbc{\_}server.jar;commons-beanutils.jar;commons-collections-2.1.1.jar;commons-dbcp-1.2.1.jar;commons-digester.jar;commons-logging.jar;commons-pool-1.2.jar;jakarta-oro-2.0.8.jar;log4j-1.2.8.jar de.simplicit.vjdbc.server.rmi.ConnectionServer vjdbc{\_}jdbcodbc{\_}basic.xml}
+\end{quote}
+
+The one and only argument is the configuration file which contains the connection definitions for this server process.
+
+
+%___________________________________________________________________________
+
+\hypertarget{http-s-using-servlets}{}
+\pdfbookmark[1]{2.2~~~HTTP(S) using Servlets}{http-s-using-servlets}
+\subsection*{2.2~~~HTTP(S) using Servlets}
+
+VJDBC can also be used over the HTTP-Protocol by using a servlet on the server-side inside a web-container. With the exception that HTTP is used, all communication is binary encoded, there are no SOAP messages exchanged which would lead to much more network traffic.
+
+The connection string for servlet connections looks like this:
+\begin{quote}
+
+\texttt{jdbc:vjdbc:servlet:<HTTP-URL>,<Connection-Id>}
+\end{quote}
+
+The HTTP-URL is certainly the URL to our VJDBC-Servlet, for example:
+\begin{quote}
+
+\texttt{jdbc:vjdbc:servlet:http://localhost:8080/vjdbc{\_}servlet/vjdbc,testdb}
+\end{quote}
+
+The red part is the connection id which must correspond to an identifier specified in the VJDBC configuration file.
+
+\textbf{Now where must the configuration file be placed ?}
+
+In previous versions of VJDBC the configuration had to be put into the environment properties of the servlet. This was quite easy to do but this type of configuration differs for each web container and its problematic when you want to set more complex or nested properties. And if you wanted to reuse the configuration of your intranet RMI server you had to mirror the properties; a quite harsh violation of the DRY principle :-)
+
+Now the configuration is totally external and thus portable. The VJDBC-Servlet searches for the file /WEB-INF/vjdbc-config.xml. Place the configuration file there and everything works exactly the same as the RMI version.
+
+\textbf{VJDBC {\&} Load-Balancing}
+
+Because VJDBC manages the references to the real JDBC-Objects in a singleton class, it is not a good idea to use it in an environment which uses load-balancing: every JVM has its own singleton object and it's not predictable which servlet container will be invoked.
+
+This problem persists even by using sessions. The state of a session can be persisted by the web-container and later be reloaded when the session gets active again. JDBC-Objects can't be persisted so the problem stays the same.
+
+One possible way to resolve the problem is to put the singleton into its own JVM. The servlet container then gets a reference to the singleton (via RMI registry or JNDI) and forwards its commands to it (delegation); implementation of such a mechanism shouldn't be a big thing so stay tuned.
+
+
+%___________________________________________________________________________
+
+\hypertarget{ejb-mode}{}
+\pdfbookmark[1]{2.3~~~EJB-Mode}{ejb-mode}
+\subsection*{2.3~~~EJB-Mode}
+
+To be written ... (basically the same as RMI but also with the load-balancing/clustering problem).
+
+
+%___________________________________________________________________________
+
+\hypertarget{configuration-usage}{}
+\pdfbookmark[0]{3~~~Configuration {\&} Usage}{configuration-usage}
+\section*{3~~~Configuration {\&} Usage}
+
+
+%___________________________________________________________________________
+
+\hypertarget{id1}{}
+\pdfbookmark[1]{3.1~~~Introduction}{id1}
+\subsection*{3.1~~~Introduction}
+
+Configuration of VJDBC is now XML based. The XML structure is translated into configuration objects by Jakarta-Digester, so VJDBC can also be configured completely programatically (more on that topic later). Most of the properties you can use have meaningful default values. This is what the simplest configuration file can look like
+\begin{quote}{\ttfamily \raggedright \noindent
+<vjdbc-configuration>~\\
+~~<connection~id="testdb"~driver="sun.jdbc.odbc.JdbcOdbcDriver"~url="jdbc:odbc:testdb"/>~\\
+</vjdbc-configuration>
+}\end{quote}
+
+There is the root element called \texttt{<vjdbc-configuration>}. It can list as many connections as you want, each with its own set of properties. You can even mix the native drivers. A more complex example for a configuration:
+\begin{quote}{\ttfamily \raggedright \noindent
+<vjdbc-configuration>~\\
+~~~~<rmi~objectName="VJdbc"~port="1500"~createRegistry="false"/>~\\
+~~~~<connection~\\
+~~~~~~~id="MyDB"~\\
+~~~~~~~driver="sun.jdbc.odbc.JdbcOdbcDriver"~\\
+~~~~~~~url="jdbc:odbc:testdb"~\\
+~~~~~~~rowPacketSize="100"~\\
+~~~~~~~compressionMode="bestcompression"~\\
+~~~~~~~compressionThreshold="2000"~\\
+~~~~~~~connectionPooling="on"~\\
+~~~~~~~loginHandler="de.simplicit.vjdbc.test.SimpleLoginHandler">~\\
+~~~~</connection>~\\
+~~~~<connection~\\
+~~~~~~~id="QuizDB"~\\
+~~~~~~~driver="com.mysql.jdbc.Driver"~\\
+~~~~~~~url="jdbc:mysql:///quiz">~\\
+~~~~</connection>~\\
+</vjdbc-configuration>
+}\end{quote}
+
+Here you can see three parts.
+
+The {\textless}rmi{\textgreater}-Part defines the RMI configuration where the VJdbc-Remote-Object will be registered at an existing RMI-Registry waiting on port 1500.
+
+The first {\textless}connection{\textgreater}-Part defines a JDBC-ODBC-Connection to the testdb-ODBC-Datasource. Because the network bandwidth is quite low, the rowPacketSize is set to 100. This means more network calls for ResultSet iteration but less data being returned by every call. Compression is set to bestcompression; default is bestspeed. When the size of the returned data doesn't surpass 2000 bytes it won't be compressed. Connection pooling is on to increase performance when opening connections to the database. Finally a special LoginHandler-Class is registered with this connection; each client must provide vjdbc.login.user and vjdbc.login.password. These credentials will be forwarded to the LoginHandler-Class, which can then use any authentication mechanism to authenticate the client.
+
+The second {\textless}connection{\textgreater}-Part defines the second connection to a MySQL-Database. Here most of the default values for the configuration are sufficient, only the mandatory properties are specified.
+
+
+%___________________________________________________________________________
+
+\hypertarget{xml-elements}{}
+\pdfbookmark[1]{3.2~~~XML-Elements}{xml-elements}
+\subsection*{3.2~~~XML-Elements}
+
+The following XML-Tags are used to configure VJDBC with a configuration file. Remember that the attribute keys are case-sensitive.
+\begin{itemize}
+\item {} 
+{\textless}rmi{\textgreater}
+\begin{itemize}
+\item {} 
+objectName (Default: VJdbc)
+
+Name to be used for registration of the RMI-Object.
+
+\item {} 
+port (2000)
+
+Port of the RMI-Registry.
+
+\item {} 
+createRegistry (true)
+
+Flag which indicates if the VJDBC-Server shall create a RMI-Registry on the specified port (\textbf{true}) or if it shall use an already existing RMI-Registry (\textbf{false}).
+
+\item {} 
+useSSL (false)
+
+Flag which indicates if SSL shall be used for RMI connections.
+
+\end{itemize}
+
+\item {} 
+{\textless}occt{\textgreater}
+
+OCCT stands for ``Orphaned-Connection-Collector-Task''. This Timer-Task checks the existing connections if they are orphaned and closes them if they have exceeded a
+configurable timeout. As VJDBC is a distributed system the OCCT is important when the client application doesn't clean up the VJDBC-Connections propertly (i. e. it 
+crashes and doesn't run through the cleanup code).
+\begin{itemize}
+\item {} 
+checkingPeriod (Default: 30 sec.)
+
+This is the period after which the OCCT periodically checks the existing connections. You can specify values in milliseconds (``60000''), seconds (``60s'') or 
+minutes (``1m''). This value can also be 0 which means that the OCCT isn't used.
+\begin{center}\begin{sffamily}
+\fbox{\parbox{\admonitionwidth}{
+\textbf{\large !DANGER!}
+\vspace{2mm}
+
+Turn it off only when you are absolutely sure that all clients close their connections properly otherwise you will end up with dangling JDBC-Connections
+that are never closed.
+}}
+\end{sffamily}
+\end{center}
+
+\item {} 
+timeout (Default: 120 sec.)
+
+When a connection is idle since this timeout period it is considered to be orphaned and is cleaned up by the OCCT. You can specify values in milliseconds (``60000''),
+seconds (``60s'') or minutes (``1m'').
+
+\end{itemize}
+
+A sample configuration using a checking period of 120 seconds and a timeout period of 5 minutes.
+\begin{quote}
+\begin{quote}{\ttfamily \raggedright \noindent
+<occt~checkingPeriod="120s"~timeout="5m"/>
+}\end{quote}
+\end{quote}
+
+\item {} 
+{\textless}connection{\textgreater}
+\begin{itemize}
+\item {} 
+id
+
+Unique identifier which can be used by clients to identify the connection they want to use.
+
+\item {} 
+driver
+
+JDBC-Driver class to be used for this connection.\raisebox{.5em}[0em]{\scriptsize\hyperlink{id7}{1}}
+
+\item {} 
+url
+
+JDBC-URL for access of the underlying database.\raisebox{.5em}[0em]{\scriptsize\hyperlink{id7}{1}}
+
+\item {} 
+dataSourceFactory
+
+Fully qualified name of a class which implements the DataSourceFactory-Interface. This interface has one method which is used to retrieve a DataSource object.\raisebox{.5em}[0em]{\scriptsize\hyperlink{id7}{1}}
+
+\item {} 
+user
+
+User-Identifier used to login to the database.\raisebox{.5em}[0em]{\scriptsize\hyperlink{id8}{2}}
+
+\item {} 
+password
+
+Password to login to the database.\raisebox{.5em}[0em]{\scriptsize\hyperlink{id8}{2}}
+
+\item {} 
+connectionPooling (true)
+
+VJDBC uses the Jakarta DBCP package for connection pooling. With this property you can turn it \textbf{on} or \textbf{off}.
+
+\item {} 
+{\textless}connection-pool{\textgreater}
+
+Besides the simple connectionPooling-Flag, the DBCP-Pool can be configured with some parameters. This is especially important when idle connections shall be closed after a specified time; by default DBCP holds pooled connections open for infinite time. When this tag is specified connection pooling is automatically turned on.
+\begin{itemize}
+\item {} 
+maxActive (8)
+
+Maximum number of connections the pool holds. When no more connections are available the call will wait until a connection is released or a SQLException will be raised after a specified timeout.
+
+\item {} 
+maxIdle (8)
+
+Maximum number of idle connections in the pool.
+
+\item {} 
+minIdle (0)
+
+Minimum number of idle connections in the pool.
+
+\item {} 
+maxWait (-1)
+
+Maximum time to wait until an openConnection()-Call will raise a SQLException. -1 means the call waits forever.
+
+\item {} 
+timeBetweenEvictionRunsMillis (-1)
+
+DBCP uses the 'Evictor'-Thread to look for idle connections. This thread is only started when this parameter has a positive value, providing the value in milliseconds. The Evictor-Thread then checks every 'timeBetweenEvictionRunsMillis' for idle connections.
+
+\item {} 
+minEvictableIdleTimeMillis (1000 * 60 * 30)
+
+The Evictor-Thread closes idle connections which were idle for more than minEvictableIdleTimeMillis
+
+\end{itemize}
+\begin{quote}{\ttfamily \raggedright \noindent
+<connection~\\
+~~~~~~~~id="HSqlDB"~\\
+~~~~~~~~...~\\
+~~~~~~~~<connection-pool~~\\
+~~~~~~~~~~~~~~~~~~~maxActive="20"~~\\
+~~~~~~~~~~~~~~~~~~~maxIdle="10"~\\
+~~~~~~~~~~~~~~~~~~~maxWait="10000"~\\
+~~~~~~~~~~~~~~~~~~~timeBetweenEvictionRunsMillis="5000"~\\
+~~~~~~~~~~~~~~~~~~~minEvictableIdleTimeMillis="10000"/>~\\
+~~~~~~~~...~~~~~~~
+}\end{quote}
+
+\item {} 
+rowPacketSize (200)
+
+Number of rows in one row packet which contain the data of a ResultSet. Large ResultSets can be delivered in several sequential row packets to reduce the network load. If this value is 0 the whole ResultSet will be delivered in one big packet.
+
+\item {} 
+prefetchResultSetMetaData (false)
+
+Normally when a ResultSet is returned its accompanying ResultSetMetaData isn't delivered. This only happens when someone calls getMetaData() on the ResultSet. If you always call getMetaData() on your ResultSets (say you do some kind of reflection on the ResultSet) it is more efficient to return the ResultSetMetaData together with the ResultSet as one remote call can be saved.
+\begin{quote}
+\begin{center}\begin{sffamily}
+\fbox{\parbox{\admonitionwidth}{
+\textbf{\large Attention!}
+\vspace{2mm}
+
+Another problem strikes depending on your database driver: VJDBC serializes the ResultSet on the server-side so most of the time the server-side ResultSet-Cursor is ``empty'' (any next() call would return false) after VJDBC returns. Database drivers might be implemented in such a way that they close the ResultSet by themselves without waiting for the client to explicitly close it. But this is crucial for reading the ResultSetMetaData because you can't read the metadata of a closed ResultSet ! So here you also can use the prefetchResultSetMetaData flag. Or if you don't use ResultSetMetaData at all, you can just ignore it !
+}}
+\end{sffamily}
+\end{center}
+\end{quote}
+
+\item {} 
+compressionMode (bestspeed)
+
+Compression mode to be used. Possible values: \textbf{none}, \textbf{bestcompression} or \textbf{bestspeed}.
+
+\item {} 
+compressionThreshold (2000)
+
+Threshold in number of bytes above which compression will be used. If the size of the data to be transported is lower than this threshold it will be delivered uncompressed because it doesn't really make a difference for the network load and speeds up both server and client because they don't need to compress/decompress the data.
+
+\item {} 
+loginHandler
+
+Fully qualified name of a class which implements the LoginHandler interface. This can be used to use another authentication mechanism than the standard db-user and -password combination.
+
+\item {} 
+charset (ISO-8859-1)
+
+There is a method called getBinaryStream() in the ResultSet interface which returns an InputStream for the data of a specific column. Because character data is transported as standard Java-UTF-8-Strings the client must have the information which encoding was originally used.
+
+\item {} 
+traceCommandCount (false)
+
+Debug-Flag. When its on VJDBC traces a statistic of the commands which were executed on a connection. This way often called commands can be identified and perhaps reduced.
+
+\item {} 
+traceOrphanedObjects (false)
+
+Debug-Flag. JDBC-Resources like Connections, Statements or ResultSets should always be freed with the close() method. VJDBC can track the points in the client program which caused the creation of these resources to easily find resource ``leaks''.
+
+\item {} 
+{\textless}named-queries{\textgreater}
+
+See \href{\#using-named-queries}{Using Named-Queries} for more details.
+
+\item {} 
+{\textless}query-filters{\textgreater}
+
+See \href{\#using-query-filters}{Using Query-Filters} for more details.
+
+\end{itemize}
+
+\end{itemize}
+\begin{figure}[b]\hypertarget{id7}$^{1}$
+Either the Driver/URL-Combination or the DataSourceFactory must be specified. If both are specified the DataSource Factory
+is used
+\end{figure}
+\begin{figure}[b]\hypertarget{id8}$^{2}$
+If User/Password isn't specified in the configuration the VJDBC client must provide these properties
+\end{figure}
+
+
+%___________________________________________________________________________
+
+\hypertarget{programmatic-configuration}{}
+\pdfbookmark[1]{3.3~~~Programmatic Configuration}{programmatic-configuration}
+\subsection*{3.3~~~Programmatic Configuration}
+
+The XML configuration is actually translated by Jakarta-Digester into a structure of configuration objects. These objects can be built programmatically for usage. You can for example embed a VJDBC RMI-Server into an already running server process by using this approach; no need for external configuration files anymore.
+\begin{quote}{\ttfamily \raggedright \noindent
+public~class~CustomRmiServer~{\{}~\\
+~~~~public~static~void~main(String{[}]~args)~{\{}~\\
+~~~~~~~~BasicConfigurator.configure();~\\
+~~~~~~~~Logger.getRootLogger().setLevel(Level.INFO);~\\
+~\\
+~~~~~~~~try~{\{}~\\
+~~~~~~~~~~~~//~Initialize~VJDBC~programmatically~\\
+~~~~~~~~~~~~System.out.println("Initializing~VJDBC");~\\
+~~~~~~~~~~~~VJdbcConfiguration~vjdbcConfig~=~new~VJdbcConfiguration();~\\
+~\\
+~~~~~~~~~~~~//~Connection-Configuration~for~Oracle~\\
+~~~~~~~~~~~~ConnectionConfiguration~configOracle~=~new~ConnectionConfiguration();~\\
+~~~~~~~~~~~~configOracle.setDriver("oracle.jdbc.OracleDriver");~\\
+~~~~~~~~~~~~configOracle.setId("OracleDB");~\\
+~~~~~~~~~~~~configOracle.setUrl("jdbc:oracle:oci:@");~\\
+~~~~~~~~~~~~configOracle.setConnectionPooling(true);~\\
+~~~~~~~~~~~~vjdbcConfig.addConnection(configOracle);~\\
+~\\
+~~~~~~~~~~~~//~Connection-Configuration~for~Oracle~\\
+~~~~~~~~~~~~ConnectionConfiguration~configOdbc~=~new~ConnectionConfiguration();~\\
+~~~~~~~~~~~~configOdbc.setDriver("sun.jdbc.odbc.JdbcOdbcDriver");~\\
+~~~~~~~~~~~~configOdbc.setId("MyDB");~\\
+~~~~~~~~~~~~configOdbc.setUrl("jdbc:odbc:testdb");~\\
+~~~~~~~~~~~~configOdbc.setConnectionPooling(true);~\\
+~~~~~~~~~~~~vjdbcConfig.addConnection(configOdbc);~\\
+~\\
+~~~~~~~~~~~~//~Finally~initialize~VJDBC~and~start~the~server~\\
+~~~~~~~~~~~~VJdbcConfiguration.init(vjdbcConfig);~\\
+~~~~~~~~~~~~ConnectionServer~server~=~new~ConnectionServer();~\\
+~~~~~~~~~~~~server.serve();~\\
+~~~~~~~~{\}}~catch(Exception~e)~{\{}~\\
+~~~~~~~~~~~~e.printStackTrace();~\\
+~~~~~~~~{\}}~\\
+~~~~{\}}~\\
+{\}}
+}\end{quote}
+
+
+%___________________________________________________________________________
+
+\hypertarget{client-side-properties}{}
+\pdfbookmark[1]{3.4~~~Client-Side Properties}{client-side-properties}
+\subsection*{3.4~~~Client-Side Properties}
+
+You can set different VJDBC-specific properties in the Properties-Object that is passed to the getConnection-Method of the DriverManager. Use the static strings in the VJdbcProperties class as the keys.
+\begin{itemize}
+\item {} 
+VJdbcProperties.LOGIN{\_}USER
+
+User-Id which will be used by the optional LoginHandler on the server to verify the access of the user (don't mix this up with the database user-id)
+
+\item {} 
+VJdbcProperties.LOGIN{\_}PASSWORD
+
+Password for the user.
+
+\item {} 
+VJdbcProperties.CLIENTINFO{\_}PROPERTIES
+
+VJDBC can pass client-side system properties to the server which logs them when the connection is closed. This can be used to monitor which users connect, what operation system the client runs on etc. Just pass a list of the property keys in a semicolon-separated string (i. e. \texttt{user.name;java.version;os.name})
+
+\item {} 
+VJdbcProperties.RMI{\_}SSL
+
+Signaling using of SSL sockets for RMI communication (true or false, default: false)
+
+\item {} 
+VJdbcProperties.CACHE{\_}TABLES
+
+List of tables which will be cached on the client by using HSQL-DB. Format of the string is \texttt{{\{}tablename{[}:refresh-interval],tablename{[}:refresh-interval]...{\}}}
+
+\end{itemize}
+
+
+%___________________________________________________________________________
+
+\hypertarget{advanced-configuration}{}
+\pdfbookmark[1]{3.5~~~Advanced configuration}{advanced-configuration}
+\subsection*{3.5~~~Advanced configuration}
+
+
+%___________________________________________________________________________
+
+\hypertarget{using-datasources}{}
+\pdfbookmark[2]{3.5.1~~~Using DataSources}{using-datasources}
+\subsubsection*{3.5.1~~~Using DataSources}
+
+By default VJDBC gets the connection to the backend database by using a standard JDBC-URL.
+
+Java 1.4 introduced the DataSource-API as an alternative. The DataSource-API is more flexible and easier to use in environments such as application servers or directory services.
+
+To get VJDBC working with the DataSource-API you need to provide a class that implements the DataSourceProvider interface. You must then specify this class in the VJDBC-Configuration. VJDBC will instantiate this class (thus it must have a constructor without parameters) and call the getDataSource() method to finally get the DataSource.
+
+A simple example using HSQL-DB. First the very basic implementation of a DataSource class. This is just for demonstration purposes, you normally wouldn't implement this class but use the class provided by your database vendor.
+\begin{quote}{\ttfamily \raggedright \noindent
+/*~\\
+Simple~DataSource~implementation~\\
+*/~\\
+public~class~HSqlDataSource~implements~DataSource~{\{}~\\
+~~~~public~HSqlDataSource()~throws~SQLException~{\{}~\\
+~~~~~~~~try~{\{}~\\
+~~~~~~~~~~~~Class.forName("org.hsqldb.jdbcDriver");~\\
+~~~~~~~~{\}}~catch~(ClassNotFoundException~e)~{\{}~\\
+~~~~~~~~~~~~throw~new~SQLException(e.getMessage());~\\
+~~~~~~~~{\}}~\\
+~~~~{\}}~\\
+~\\
+~~~~...~\\
+~\\
+~~~~public~Connection~getConnection()~throws~SQLException~{\{}~\\
+~~~~~~~~return~DriverManager.getConnection("jdbc:hsqldb:.");~\\
+~~~~{\}}~\\
+~\\
+~~~~public~Connection~getConnection(String~username,~String~password)~throws~SQLException~{\{}~\\
+~~~~~~~~return~DriverManager.getConnection("jdbc:hsqldb:.",~username,~password);~\\
+~~~~{\}}~\\
+{\}}
+}\end{quote}
+
+Now the DataSourceProvider implementation for VJDBC
+\begin{quote}{\ttfamily \raggedright \noindent
+package~de.simplicit.vjdbc.test.junit.hsqldb;~\\
+~\\
+import~java.sql.SQLException;~\\
+import~javax.sql.DataSource;~\\
+import~de.simplicit.vjdbc.server.DataSourceProvider;~\\
+~\\
+public~class~HSqlDataSourceProvider~implements~DataSourceProvider~{\{}~\\
+~~~~public~DataSource~getDataSource()~throws~SQLException~{\{}~\\
+~~~~~~~~return~new~HSqlDataSource();~\\
+~~~~{\}}~\\
+{\}}
+}\end{quote}
+
+Finally we must specify the DataSourceProvider class in our configuration
+\begin{quote}{\ttfamily \raggedright \noindent
+<connection~\\
+~~~~id="HSqlDB-DataSource"~\\
+~~~~dataSourceProvider="de.simplicit.vjdbc.test.junit.hsqldb.HSqlDataSourceProvider"~\\
+~~~~user="sa"~\\
+~~~~password="{}"~\\
+~~~~...
+}\end{quote}
+
+
+%___________________________________________________________________________
+
+\hypertarget{using-loginhandlers}{}
+\pdfbookmark[2]{3.5.2~~~Using LoginHandlers}{using-loginhandlers}
+\subsubsection*{3.5.2~~~Using LoginHandlers}
+
+VJDBC behaves like a normal JDBC driver so it is necessary to provide user and password for the database login.
+
+This can be a problem because you must specify the user/password combination on the client side. A malicious user could look into the Java byte code to find the user/password information and then try to login to the database completely out of the context of the original scenario. Bad things can happen when this user-login has advanced privileges ...
+
+VJDBC offers a simple mechanism to replace the database login with a different login mechanism (JAAS for example). To use this mechanism you must provide a LoginHandler class which checks the credentials of the client.
+
+The following example explains the concept. Say you want to manage the VJDBC users with an ordinary properties file called user.properties.
+\begin{quote}{\ttfamily \raggedright \noindent
+{\#}~Format~\\
+{\#}~User=Password~\\
+mike=secret~\\
+gerry=cool
+}\end{quote}
+
+Now write the class that implements the LoginHandler interface and reads the user.properties file
+\begin{quote}{\ttfamily \raggedright \noindent
+package~de.simplicit.vjdbc.test;~\\
+~\\
+import~de.simplicit.vjdbc.VJdbcException;~\\
+import~de.simplicit.vjdbc.server.LoginHandler;~\\
+~\\
+import~java.io.IOException;~\\
+import~java.io.InputStream;~\\
+import~java.util.Properties;~\\
+~\\
+public~class~SimpleLoginHandler~implements~LoginHandler~{\{}~\\
+~~~~private~Properties~{\_}properties~=~new~Properties();~\\
+~\\
+~~~~public~SimpleLoginHandler()~throws~IOException~{\{}~\\
+~~~~~~~~InputStream~is~=~Thread.currentThread().getContextClassLoader().getResourceAsStream("de/simplicit/vjdbc/test/user.properties");~\\
+~~~~~~~~{\_}properties.load(is);~\\
+~~~~{\}}~\\
+~\\
+~~~~//~When~the~login~of~the~user~fails,~just~throw~a~VJdbcException~\\
+~~~~public~void~checkLogin(String~user,~String~password)~throws~VJdbcException~{\{}~\\
+~~~~~~~~if~(user~!=~null)~{\{}~\\
+~~~~~~~~~~~~String~pw~=~{\_}properties.getProperty(user);~\\
+~\\
+~~~~~~~~~~~~if~(pw~!=~null)~{\{}~\\
+~~~~~~~~~~~~~~~~if~(!pw.equals(password))~{\{}~\\
+~~~~~~~~~~~~~~~~~~~~throw~new~VJdbcException("Password~for~user~"~+~user~+~"~is~wrong");~\\
+~~~~~~~~~~~~~~~~{\}}~\\
+~~~~~~~~~~~~{\}}~else~{\{}~\\
+~~~~~~~~~~~~~~~~throw~new~VJdbcException("Unknown~user~"~+~user);~\\
+~~~~~~~~~~~~{\}}~\\
+~~~~~~~~{\}}~else~{\{}~\\
+~~~~~~~~~~~~throw~new~VJdbcException("User~is~null");~\\
+~~~~~~~~{\}}~\\
+~~~~{\}}~\\
+{\}}
+}\end{quote}
+\begin{center}\begin{sffamily}
+\fbox{\parbox{\admonitionwidth}{
+\textbf{\large Attention!}
+\vspace{2mm}
+
+VJDBC differentiates between the user/password combination for the database and for the custom login mechanism. User/Password for the latter must be provided in the Properties object that is handed over to the DriverManager on the client side. Use the identifier provided by the VJdbcProperties class to put the information into the properties.
+\begin{quote}{\ttfamily \raggedright \noindent
+Properties~props~=~new~Properties();~\\
+props.setProperty(VJdbcProperties.LOGIN{\_}USER,~"mike");~\\
+props.setProperty(VJdbcProperties.LOGIN{\_}PASSWORD,~"secret");~\\
+~\\
+{\_}connection~=~DriverManager.getConnection("jdbc:vjdbc:rmi://localhost:2345/VJdbc,MyDB",~props);
+}\end{quote}
+}}
+\end{sffamily}
+\end{center}
+
+
+%___________________________________________________________________________
+
+\hypertarget{using-named-queries}{}
+\pdfbookmark[2]{3.5.3~~~Using Named-Queries}{using-named-queries}
+\subsubsection*{3.5.3~~~Using Named-Queries}
+
+By using Named-Queries you can replace the SQL strings in your application with identifiers. VJDBC replaces these identifiers on-the-fly with the SQL statement that you provide with the configuration. An identifier starts with a dollar sign and must be unique for a connection configuration. The Named-Queries must be listed in the {\textless}named-queries{\textgreater} element of the connection:
+\begin{quote}{\ttfamily \raggedright \noindent
+<connection~\\
+~~~~id="HSqlDB"~\\
+~~~~...~\\
+~~~~<named-queries>~\\
+~~~~~~~~<entry~id="selectAllAddresses">select~*~from~Address</entry>~\\
+~~~~~~~~<entry~id="updateAllAddresses">update~Address~set~name~=~'Balla'~where~name~=~'Billi'</entry>~\\
+~~~~~~~~...~\\
+~~~~</named-queries>
+}\end{quote}
+
+In the application you must pass the id-String preceded with a dollar-sign instead of SQL.
+\begin{quote}{\ttfamily \raggedright \noindent
+Connection~connVJdbc~=~createVJdbcConnection();~\\
+PreparedStatement~pstmt2~=~connVJdbc.prepareStatement("{\$}selectAllAddresses");~\\
+ResultSet~rs1~=~pstmt1.executeQuery();~\\
+...
+}\end{quote}
+
+
+%___________________________________________________________________________
+
+\hypertarget{using-query-filters}{}
+\pdfbookmark[2]{3.5.4~~~Using Query-Filters}{using-query-filters}
+\subsubsection*{3.5.4~~~Using Query-Filters}
+
+With Query-Filters it is possible to check the supplied SQL against standard regular expressions. That way you can prevent malicious queries to come through to the backend database. Like Named-Queries the Query-Filters are specified in the configuration of VJDBC:
+\begin{quote}{\ttfamily \raggedright \noindent
+<connection~\\
+~~~~id="HSqlDB"~\\
+~~~~driver="org.hsqldb.jdbcDriver"~\\
+~~~~url="jdbc:hsqldb:."~\\
+~~~~~~~~~~~~...~\\
+~~~~<named-queries>~\\
+~~~~~~~~<entry~id="selectAllAddresses">select~*~from~Address</entry>~\\
+~~~~~~~~<entry~id="updateAllAddresses">update~Address~set~name~=~'Balla'~where~name~=~'Billi'</entry>~\\
+~~~~</named-queries>~\\
+~~~~<query-filters>~\\
+~~~~~~~~<allow>insert~.+</allow>~\\
+~~~~~~~~<allow>SeLeCt~.+</allow>~\\
+~~~~~~~~<allow>CREATE~.+</allow>~\\
+~~~~~~~~<allow>update~.+</allow>~\\
+~~~~~~~~<allow>drop~table~.+</allow>~\\
+~~~~~~~~<deny>.+</deny>~\\
+~~~~</query-filters>~\\
+</connection>
+}\end{quote}
+
+Two types of Query-Filters are currently available, the Allow-Filter and the Deny-Filter. You can specify any number of those filters to create a complete chain of filters. VJDBC will check each SQL statement against those filters; if an Allow-Filter matches, the filter-check stops and the statement will be executed. If a Deny-Filter matches, the filter-check stops and a SQLException will be thrown to notify the client. If no match is found, the statement will be executed.
+
+Query-Filters are case-insensitive as you can see in the example above.
+
+By default all SQL strings are checked if they \emph{match} the regular expression completely. You can also specify that the SQL string only \emph{contains} the regex pattern by adding a \texttt{type} attribute to the filter. If you want to reject all SQL statements that contain ``delete'', you can specify the following Deny-Filter
+\begin{quote}{\ttfamily \raggedright \noindent
+<deny~type="contains">delete</deny>
+}\end{quote}
+
+This way you don't need to add regex characters for handling ``noise'' like white space.
+
+
+%___________________________________________________________________________
+
+\hypertarget{combining-named-queries-and-query-filters}{}
+\pdfbookmark[3]{3.5.4.1~~~Combining Named-Queries and Query-Filters}{combining-named-queries-and-query-filters}
+\subsubsection*{3.5.4.1~~~Combining Named-Queries and Query-Filters}
+
+By combining Named-Queries and Query-Filters you can make your application flexible and secure. Named-Queries are \textbf{not} checked against Query-Filters after resolution of the identifier. Say you want to prevent the execution of ``uncontrolled'' Delete- and Drop-Statements. You could start with a configuration like this:
+\begin{quote}{\ttfamily \raggedright \noindent
+<named-queries>~\\
+~~~~<entry~id="deleteAddress">delete~from~Address~where~Id~=~?</entry>~\\
+</named-queries>~\\
+<query-filters>~\\
+~~~~<deny~type="contains">delete</deny>~\\
+~~~~<deny~type="contains">drop</deny>~\\
+</query-filters>
+}\end{quote}
+
+Here all Delete- and Drop-Statements are denied except the one specified in the Named-Query.
+
+
+%___________________________________________________________________________
+
+\hypertarget{logging}{}
+\pdfbookmark[1]{3.6~~~Logging}{logging}
+\subsection*{3.6~~~Logging}
+
+VJDBC uses the Jakarta-Package Commons-Logging for tracing information about what's happening at the moment. With Commons-Logging you can switch your Logging implementation very easily (i.e. from Log4J to JDK1.4-Logging or vice versa). There is even a simple logging implementation included for output on stderr.
+
+To use Log4J-Logging you only have to include the Log4J-Package in the classpath plus a file called log4j.properties which must be reachable for the classloader. Nothing more to do !
+
+
+%___________________________________________________________________________
+
+\hypertarget{vendor-specific-informations}{}
+\pdfbookmark[0]{4~~~Vendor-Specific informations}{vendor-specific-informations}
+\section*{4~~~Vendor-Specific informations}
+
+VJDBC should work with any JDBC compliant driver but as always reality isn't 100{\%}. All vendor specific issues will be collected and written down in the following chapters.
+
+
+%___________________________________________________________________________
+
+\hypertarget{oracle-9i}{}
+\pdfbookmark[1]{4.1~~~Oracle 9i}{oracle-9i}
+\subsection*{4.1~~~Oracle 9i}
+\begin{itemize}
+\item {} 
+Driver: ojdbc14.jar, nls{\_}charset12.jar
+
+\end{itemize}
+
+The Oracle thin driver seems to have a limit of 4k for CLOBs. The following code fragment produces an exception \texttt{java.sql.SQLException: E/A-Exception: Connection reset}
+\begin{quote}{\ttfamily \raggedright \noindent
+//~Creating~the~table~\\
+~~~~stmt.executeUpdate("create~table~clobs~(id~int,~someclob~clob)");~\\
+~~~~...~\\
+~~~~//~a~little~bit~later~I~try~to~write~some~CLOBs~\\
+~~~~for(int~i~=~0;~i~<~1000;~i++)~{\{}~\\
+~~~~~~~~~~~~sb.append("CLOBDATA");~\\
+~~~~{\}}~\\
+~~~~String~clobdata~=~sb.toString();~\\
+~~~~PreparedStatement~pstmt~=~conn.prepareStatement("insert~into~clobs~values(?,~?)");~\\
+~~~~for(int~i~=~1;~i~<=~10;~i++)~{\{}~\\
+~~~~~~~~~~~~pstmt.setInt(1,~i);~\\
+~~~~~~~~~~~~pstmt.setCharacterStream(2,~new~StringReader(clobdata),~clobdata.length());~\\
+~~~~~~~~~~~~pstmt.executeUpdate();~\\
+~~~~{\}}~\\
+~~~~pstmt.close();
+}\end{quote}
+
+When I set the upper-limit of the first for-loop to 100 (instead of 8000 characters there are 800 characters) all works fine !
+
+
+%___________________________________________________________________________
+
+\hypertarget{db2-8-2}{}
+\pdfbookmark[1]{4.2~~~DB2 8.2}{db2-8-2}
+\subsection*{4.2~~~DB2 8.2}
+\begin{itemize}
+\item {} 
+Driver: db2jcc.jar, db2jcc{\_}license{\_}cu.jar
+
+\end{itemize}
+
+This driver seems to close ResultSets when the last row was passed by the cursor. A succeeding getMetaData() call fails with ``resultset is closed''. The connection flag ``prefetchResultSetMetaData'' can be used to immediately read the meta data before the resultset is closed.
+
+\end{document}

@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Untitled Document</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="../vjdbc.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<p class="headerfont">Using VJDBC in Applets</p>
+<p class="textfont">Using VJDBC in applets requires some additional configuration 
+  and re-packaging but it's nevertheless quite easy. So imagine you have to write 
+  a small quiz applet for your company where the winner will get a nice price 
+  at the end of the year.</p>
+<p class="headerfontsmaller">The Database</p>
+<p class="textfont">For the sake of simplicity you want to save the data in a 
+  Microsoft Access database. You design the following tables:</p>
+<table width="37%" border="1">
+  <tr class="textfont"> 
+    <td colspan="2" class="headerfontsmaller">Question</td>
+  </tr>
+  <tr class="textfont"> 
+    <td width="44%">Id (Primary Key)</td>
+    <td width="56%">AutoIncrement</td>
+  </tr>
+  <tr class="textfont"> 
+    <td>Question</td>
+    <td>VarChar(255)</td>
+  </tr>
+  <tr class="textfont"> 
+    <td>Answer1</td>
+    <td>VarChar(255)</td>
+  </tr>
+  <tr class="textfont"> 
+    <td>Answer2</td>
+    <td>VarChar(255)</td>
+  </tr>
+  <tr class="textfont"> 
+    <td>Answer3</td>
+    <td>VarChar(255)</td>
+  </tr>
+  <tr class="textfont"> 
+    <td>Answer4</td>
+    <td>VarChar(255)</td>
+  </tr>
+  <tr class="textfont"> 
+    <td>CorrectAnswer</td>
+    <td>Integer</td>
+  </tr>
+</table>
+<br>
+<table width="37%" border="1">
+  <tr class="textfont"> 
+    <td colspan="2" class="headerfontsmaller">Answer</td>
+  </tr>
+  <tr class="textfont"> 
+    <td width="44%">User (Primary Key)</td>
+    <td width="56%">VarChar(50)</td>
+  </tr>
+  <tr class="textfont"> 
+    <td>CorrectAnswers</td>
+    <td>Integer</td>
+  </tr>
+</table>
+<p class="textfont">Put some questions in the &quot;Question&quot;-Table.</p>
+<p class="headerfontsmaller">The Applet</p>
+<p class="textfont">Now lets code the applet. It will first request a username 
+  and then proceed to get the answers from the user. After each question the user 
+  entry in the database will be updated. Finally there will be a highscore table 
+  displayed.</p>
+<p class="textfont">You'll find the complete source code <a href="../sample/de/simplicit/vjdbc/test/QuizApplet.java">here</a>. 
+  I think it's quite self-explaining but I'll comment the sections which concern 
+  the VJDBC connections.</p>
+<p class="textfont">After the class definition we'll start with overriding the 
+  init() method of Applet. First we try to load the VJDBC-Driver:</p>
+<p class="codefont"> public void init() {<br>
+  &nbsp; try {<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;Class.forName(&quot;de.simplicit.vjdbc.VirtualDriver&quot;).newInstance();<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;...</p>
+<p class="textfont"> The code to get a JDBC-Connection is in a separate method: 
+</p>
+<p class="textfont"> <span class="codefont">private Connection openConnection() 
+  throws SQLException {<br>
+  &nbsp;&nbsp;&nbsp;URL codebase = getCodeBase();<br>
+  &nbsp;&nbsp;&nbsp;String vjdbcurl = &quot;jdbc:vjdbc:servlet:&quot; + codebase.toString() 
+  + &quot;vjdbc,QuizDB&quot;;<br>
+  &nbsp;&nbsp;&nbsp;return DriverManager.getConnection(vjdbcurl);<br>
+  }</span></p>
+<p class="textfont">Here you can see that the URL is constructed from the codebase 
+  of the webpage plus the mapping name of the VJDBC servlet (which is &quot;vjdbc&quot;).</p>
+<p class="headerfontsmaller">The Deployment</p>
+<p class="textfont">Beside the QuizApplet the browser VM needs the VJDBC client 
+  classes and the jars they depend on. This can be achieved by repackaging the 
+  necessary classes with an Ant task. Take a look at the build.xml:</p>
+<p class="codefont"> &lt;target name=&quot;generateAppletArchive&quot; depends=&quot;generateJars&quot;&gt;<br>
+  &nbsp;&nbsp;&lt;delete file=&quot;deploy/vjdbc_applet.jar&quot;/&gt;<br>
+  &nbsp;&nbsp;&lt;copy todir=&quot;${tmpdir}/applet&quot;&gt;<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&lt;fileset dir=&quot;${tmpdir}/class&quot; includes=&quot;de/**/QuizApplet*&quot;/&gt;<br>
+  &nbsp;&nbsp;&lt;/copy&gt;<br>
+  &nbsp;&nbsp;&lt;unjar src=&quot;lib/vjdbc.jar&quot; dest=&quot;${tmpdir}/applet&quot;/&gt;<br>
+  &nbsp;&nbsp;&lt;unjar src=&quot;lib/commons-logging.jar&quot; dest=&quot;${tmpdir}/applet&quot;/&gt;<br>
+  &nbsp;&nbsp;&lt;jar basedir=&quot;${tmpdir}/applet&quot; destfile=&quot;deploy/vjdbc_applet.jar&quot;/&gt;<br>
+  &lt;/target&gt;</p>
+<p class="textfont">With this task the QuizApplet will be packaged together with 
+  the two jars which will be needed on the client side. Place vjdbc_applet.jar 
+  in the directory of your web application and insert the following code in your 
+  HTML page:</p>
+<p class="codefont">&lt;BODY&gt;<br>
+  This small applet shows how VJDBC can be used to access a JDBC datasource over 
+  HTTP.&lt;P&gt;<br>
+  &lt;APPLET CODE=&quot;de.simplicit.vjdbc.test.QuizApplet&quot; ARCHIVE=&quot;vjdbc_applet.jar&quot; 
+  WIDTH=500 HEIGHT=300&gt;<br>
+  &lt;/APPLET&gt;<br>
+  &lt;/BODY&gt;</p>
+<p class="textfont">The directory structure of your webapp should look like this:</p>
+<p class="codefont">webapps (dir)<br>
+  &nbsp;&nbsp;vjdbc_servlet (dir)<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;META-INF (dir)<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MANIFEST.MF<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WEB-INF (dir)<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;web.xml<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lib (dir)<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;... VJDBC-Jars ...<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index.html<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;applet.html<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vjdbc_applet.jar</p>
+<p class="textfont">The VJDBC-Servlet must be configured like <a href="reference.htm#Servlet_Mode" target="_self">here</a>.</p>
+</body>
+</html>

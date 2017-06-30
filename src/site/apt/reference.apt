@@ -1,0 +1,785 @@
+1. Introduction
+
+* 1.1 What is VJDBC ?
+
+    VJDBC (Virtual JDBC) is a JDBC type 3 driver which provides a client-server model for remote access of JDBC datasources over different network protocols.
+
+* 1.2 Features
+
+      * High-Speed
+
+      Communication to the server and delivering of the results are extremely optimized for highest serialization speed.
+
+      * Command-Pattern
+
+      Most method calls on VJDBC-Objects are wrapped in Command-Objects which will then be sent to the server-component for processing over Command-Sinks. A Command-Sink has a very lean interface (actually two methods !) so its very easy to provide new Command-Sink-Implementations for other protocols (i.e. SOAP, XML-RPC ...).
+
+      * Different Command-Sinks provided
+
+      There are actually three Command-Sink-Implementations in the VJDBC-Package: RMI, HTTP(S) and EJB. The latter ones are somewhat experimental because they don't bother about clustering, EJB container transactions and so on.
+
+      * Transparent compression
+
+      Data is transparently compressed to provide good performance in low-bandwidth environments.
+
+      * Parameter batching
+
+      Parameters for prepared statements and batch updates will be collected on the client side until the statement is finally executed.
+
+      * Streaming ResultSets
+
+      JDBC-ResultSets can be very large (intentionally or unintentionally). To reduce network load and thus provide a faster response ResultSets can be split up in multiple sequential row packets by a definable packet size.
+
+      * Caching
+
+      Some data doesn't change over the lifetime of a JDBC-Object (i.e. the metadata of a PreparedStatement). Such data will be cached on the client-side to reduce network load for repeated calls.
+
+      * Checking for orphaned connections
+
+      A timer task frequently checks for orphaned connections, there are no dangling connections.
+
+      * Connection Pooling
+
+      VJDBC optionally uses the Jakarta-DBCP-Package for efficient connection pooling.
+
+      * Named-Queries & Query-Filters
+
+      To make the client-server connection more secure VJDBC can be configured to only allow specific queries. Additionally queries can be filtered through regular expressions.
+
+* 1.3 Compatibility
+
+    VJDBC implements the complete JDBC-API of J2SE 1.4, including SavePoints, Batch-Updates and so on. It certainly depends on the used database drivers if these recent features are available.
+
+    VJDBC-ResultSets are read-only, they are not updatable. You will get UnsupportedOperationExceptions when you call the update...() methods. Because updatable ResultSets IMHO aren't use very often (indeed they're quite exotic), this is only a minor drawback.
+
+2. Supported Protocols
+
+* 2.1 RMI
+
+    Using VJDBC with RMI is almost completely described in the quickstart tutorial, please first take a look at this example to get an idea how RMI access works.
+
+    To use VJDBC in RMI-Mode the JDBC connection string must have a specific layout:
+
++----------------------------------------------------------------+
+jdbc:vjdbc:rmi:<RMI-URI>,<Connection-Id>
++----------------------------------------------------------------+
+
+    The RMI-URI contains the reference to the RMI-Registry and the name of the RMI-Object we want to get a reference to. When you start the RMI-Server without additional parameters you can reach the RMI-Object with the following string:
+
++----------------------------------------------------------------+
+jdbc:vjdbc:rmi://localhost:2000/VJdbc,testdb
++----------------------------------------------------------------+
+
+    The last part <Connection-Id> is an identifier for the JDBC connection. There can be any number of connection definitions so all clients need to identify the connection they desire to access.
+
+    Instead of the comma separator you can also use the following characters to separate the URI from the Connection-Id: ; # $ § so the following connection strings are also valid
+
++----------------------------------------------------------------+
+jdbc:vjdbc:rmi://localhost:2000/VJdbc;testdb
+
+jdbc:vjdbc:rmi://localhost:2000/VJdbc#testdb
+
+jdbc:vjdbc:rmi://localhost:2000/VJdbc$testdb
+
+jdbc:vjdbc:rmi://localhost:2000/VJdbc§testdb
++----------------------------------------------------------------+
+
+    The server-component can now be started with
+
++----------------------------------------------------------------+
+java -classpath vjdbc.jar;vjdbc_server.jar;commons-beanutils.jar;commons-collections-2.1.1.jar;commons-dbcp-1.2.1.jar;commons-digester.jar;commons-logging.jar;commons-pool-1.2.jar;jakarta-oro-2.0.8.jar;log4j-1.2.8.jar de.simplicit.vjdbc.server.rmi.ConnectionServer vjdbc_jdbcodbc_basic.xml
+The one and only argument is the configuration file which contains the connection definitions for this server process.
++----------------------------------------------------------------+
+
+* 2.2 HTTP(S) using Servlets
+
+    VJDBC can also be used over the HTTP-Protocol by using a servlet inside a web-container. With the exception that HTTP is used, all communication is binary encoded, there are no XML messages (i. e. SOAP) exchanged which would lead to much more network traffic.
+
+    The connection string for servlet connections looks like this:
+
++----------------------------------------------------------------+
+jdbc:vjdbc:servlet:<HTTP-URL>,<Connection-Id>
++----------------------------------------------------------------+
+
+    The HTTP-URL is certainly the URL to our VJDBC-Servlet, for example:
+
++----------------------------------------------------------------+
+jdbc:vjdbc:servlet:http://localhost:8080/vjdbc_servlet/vjdbc,testdb
++----------------------------------------------------------------+
+
+    The red part is the connection id which must correspond to an identifier specified in the VJDBC configuration file.
+
+    Instead of the comma separator you can also use the following characters to separate the URI from the Connection-Id: ; # $ § so the following connection strings are also valid
+
++----------------------------------------------------------------+
+jdbc:vjdbc:rmi://localhost:2000/VJdbc;testdb
+
+jdbc:vjdbc:rmi://localhost:2000/VJdbc#testdb
+
+jdbc:vjdbc:rmi://localhost:2000/VJdbc$testdb
+
+jdbc:vjdbc:rmi://localhost:2000/VJdbc§testdb
++----------------------------------------------------------------+
+
+** 2.2.1 Configuration resource
+
+      In previous versions of VJDBC the configuration had to be put into the environment properties of the servlet. This was quite easy to do but this type of configuration differs for each web container and its problematic when you want to set more complex or nested properties. And if you wanted to reuse the configuration of your intranet RMI server you had to mirror the properties; a quite harsh violation of the DRY principle :-)
+
+      Now the configuration is totally external and thus portable. By default the VJDBC-Servlet searches for the file /WEB-INF/vjdbc-config.xml. Place the configuration file there and everything works exactly the same as the RMI version.
+
+      If you want to place the configuration in a different location or want to rename it you can use the servlet init parameter 'config-resource'. The value of this parameter must match the requirements of ServletContext.getResource(). Example:
+
++----------------------------------------------------------------+
+<web-app>
+...
+    <servlet>
+        <servlet-name>VJdbcServlet</servlet-name>
+        <servlet-class>de.simplicit.vjdbc.server.servlet.ServletCommandSink</servlet-class>
+        <init-param>
+            <param-name>config-resource</param-name>
+            <param-value>/WEB-INF/config/what-a-config.xml</param-value>
+        </init-param>
+    </servlet>
++----------------------------------------------------------------+
+
+** 2.2.2 Variables resource
+
+      You can also use the configuration variables feature (see Configuration Variables) to externalize specific settings within the configuration. The init parameter 'config-variables' must be specified in this case:
+
++----------------------------------------------------------------+
+<web-app>
+...
+    <servlet>
+        <servlet-name>VJdbcServlet</servlet-name>
+        <servlet-class>de.simplicit.vjdbc.server.servlet.ServletCommandSink</servlet-class>
+        <init-param>
+            <param-name>config-resource</param-name>
+            <param-value>/WEB-INF/config/what-a-config.xml</param-value>
+        </init-param>
+        <init-param>
+            <param-name>config-variables</param-name>
+            <param-value>/WEB-INF/config/some-variables.properties</param-value>
+        </init-param>
+    </servlet>
++----------------------------------------------------------------+
+
+** 2.2.3 VJDBC & Load-Balancing
+
+      Because VJDBC manages the references to the real JDBC-Objects in a singleton class, it is not a good idea to use it in an environment which uses load-balancing: every JVM has its own singleton object and it's not predictable which servlet container will be invoked.
+
+      This problem persists even by using sessions. The state of a session can be persisted by the web-container and later be reloaded when the session gets active again. JDBC-Objects can't be persisted so the problem stays the same.
+
+      One possible way to resolve the problem is to put the singleton into its own JVM. The servlet container then gets a reference to the singleton (via RMI registry or JNDI) and forwards its commands to it (delegation); implementation of such a mechanism shouldn't be a big thing so stay tuned.
+
+* 2.3 EJB-Mode
+
+    To be written ... (basically the same as RMI but also with the load-balancing/clustering problem).
+
+3. Configuration & Usage
+
+* 3.1 Introduction
+
+    Configuration of VJDBC is XML based. The XML structure is translated into configuration objects by Jakarta-Digester, so VJDBC can also be configured completely programatically (more on that topic later). Most of the properties you can use have meaningful default values. This is what the simplest configuration file can look like
+
++----------------------------------------------------------------+
+<vjdbc-configuration>
+<connection id="testdb" driver="sun.jdbc.odbc.JdbcOdbcDriver" url="jdbc:odbc:testdb"/>
+</vjdbc-configuration>
++----------------------------------------------------------------+
+
+    There is the root element called <vjdbc-configuration>. It can list as many connections as you want, each with its own set of properties. You can even mix the native drivers. A more complex example for a configuration:
+
++----------------------------------------------------------------+
+<vjdbc-configuration>
+    <rmi objectName="VJdbc" port="1500" createRegistry="false"/>
+    <connection
+       id="MyDB"
+       driver="sun.jdbc.odbc.JdbcOdbcDriver"
+       url="jdbc:odbc:testdb"
+       user="vjdbc"
+       password="vjdbc"
+       rowPacketSize="100"
+       compressionMode="bestcompression"
+       compressionThreshold="2000"
+       connectionPooling="on"
+       loginHandler="de.simplicit.vjdbc.test.SimpleLoginHandler">
+    </connection>
+    <connection
+       id="QuizDB"
+       driver="com.mysql.jdbc.Driver"
+       url="jdbc:mysql:///quiz">
+    </connection>
+</vjdbc-configuration>
++----------------------------------------------------------------+
+
+    Here you can see three parts.
+
+    The <rmi>-Part defines the RMI configuration where the VJdbc-Remote-Object will be registered at an existing RMI-Registry waiting on port 1500.
+
+    The first <connection>-Part defines a JDBC-ODBC-Connection to the testdb-ODBC-Datasource incl. the account to use for the connection. Because the network bandwidth is quite low, the rowPacketSize is set to 100. This means more network calls for ResultSet iteration but less data being returned by every call. Compression is set to bestcompression; default is bestspeed. When the size of the returned data doesn't surpass 2000 bytes it won't be compressed. Connection pooling is on to increase performance when opening connections to the database. Finally a special LoginHandler-Class is registered with this connection; each client must provide vjdbc.login.user and vjdbc.login.password. These credentials will be forwarded to the LoginHandler-Class, which can then use any authentication mechanism to authenticate the client.
+
+  The second <connection>-Part defines the second connection to a MySQL-Database. Here most of the default values for the configuration are sufficient, only the mandatory properties are specified.
+
+* 3.2 XML-Elements
+
+    The following XML-Tags are used to configure VJDBC with a configuration file. Remember that the attribute keys are case-sensitive.
+
+    * <rmi>
+
+      * objectName (Default: VJdbc)
+
+      Name to be used for registration of the RMI-Object.
+
+      * registryPort (2000)
+
+      Port of the RMI-Registry.
+
+      * remotingPort (0)
+
+      Port which is used by the remote objects to listen for client requests. By default the value is 0 which means RMI uses an anonymous port. If you must pass a firewall it is probable that you need to set this value to a fixed port number provided by your network administrator.
+
+      * createRegistry (true)
+
+      Flag which indicates if the VJDBC-Server shall create a RMI-Registry on the specified port (true) or if it shall use an already existing RMI-Registry (false).
+
+      * useSSL (false)
+
+      Flag which indicates if SSL shall be used for RMI connections.
+  
+    * <occt>
+
+    OCCT stands for "Orphaned-Connection-Collector-Task". This Timer-Task checks the existing connections if they are orphaned and closes them if they have exceeded a configurable timeout. As VJDBC is a distributed system the OCCT is important when the client application doesn't clean up the VJDBC-Connections propertly (i. e. it crashes and doesn't run through the cleanup code).
+
+      * checkingPeriod (Default: 30 sec.)
+
+      This is the period after which the OCCT periodically checks the existing connections. You can specify values in milliseconds ("60000"), seconds ("60s") or minutes ("1m"). This value can also be 0 which means that the OCCT isn't used.
+
++----------------------------------------------------------------+
+!DANGER!
+
+Turn it off only when you are absolutely sure that all clients close their connections properly otherwise you will end up with dangling JDBC-Connections that are never closed.
++----------------------------------------------------------------+
+
+      * timeout (Default: 120 sec.)
+
+      When a connection is idle since this timeout period it is considered to be orphaned and is cleaned up by the OCCT. You can specify values in milliseconds ("60000"), seconds ("60s") or minutes ("1m").
+
+      A sample configuration using a checking period of 120 seconds and a timeout period of 5 minutes.
+
++----------------------------------------------------------------+
+<occt checkingPeriod="120s" timeout="5m"/>
++----------------------------------------------------------------+
+
+    * <connection>
+
+      * id
+
+      Unique identifier which can be used by clients to identify the connection they want to use.
+
+      * driver
+
+      JDBC-Driver class to be used for this connection. [1]
+
+      * url
+
+      JDBC-URL for access of the underlying database. [1]
+
+      * dataSourceFactory
+
+      Fully qualified name of a class which implements the DataSourceFactory-Interface. This interface has one method which is used to retrieve a DataSource object. [1]
+
+      * user
+
+      User-Identifier used to login to the database. [2]
+
+      * password
+
+      Password to login to the database. [2]
+
+      * connectionPooling (on)
+
+      VJDBC uses the Jakarta DBCP package for connection pooling. With this property you can turn it on or off.
+
++----------------------------------------------------------------+
+Attention!
+
+Connection pooling can only be used when a dataSourceFactory is used or when a user/password is provided. In any other case user-specific database accounts will be used and thus connection pooling must be disabled. One more reason to provide a custom login handler.
++----------------------------------------------------------------+
+
+    * <connection-pool>
+
+    Besides the simple connectionPooling-Flag, the DBCP-Pool can be configured with some parameters. This is especially important when idle connections shall be closed after a specified time; by default DBCP holds pooled connections open for infinite time. When this tag is specified connection pooling is automatically turned on.
+
+      * maxActive (8)
+
+      Maximum number of connections the pool holds. When no more connections are available the call will wait until a connection is released or a SQLException will be raised after a specified timeout.
+
+      * maxIdle (8)
+
+      Maximum number of idle connections in the pool.
+
+      * minIdle (0)
+
+      Minimum number of idle connections in the pool.
+
+      * maxWait (-1)
+
+      Maximum time to wait until an openConnection()-Call will raise a SQLException. -1 means the call waits forever.
+
+      * timeBetweenEvictionRunsMillis (-1)
+
+      DBCP uses the 'Evictor'-Thread to look for idle connections. This thread is only started when this parameter has a positive value, providing the value in milliseconds. The Evictor-Thread then checks every 'timeBetweenEvictionRunsMillis' for idle connections.
+
+      * minEvictableIdleTimeMillis (1000 * 60 * 30)
+
+      The Evictor-Thread closes idle connections which were idle for more than minEvictableIdleTimeMillis
+
++----------------------------------------------------------------+
+<connection
+        id="HSqlDB"
+        ...
+        <connection-pool
+                   maxActive="20"
+                   maxIdle="10"
+                   maxWait="10000"
+                   timeBetweenEvictionRunsMillis="5000"
+                   minEvictableIdleTimeMillis="10000"/>
+        ...
++----------------------------------------------------------------+
+
+    * rowPacketSize (200)
+
+    Number of rows in one row packet which contain the data of a ResultSet. Large ResultSets can be delivered in several sequential row packets to reduce the network load. If this value is 0 the whole ResultSet will be delivered in one big packet.
+
+    * prefetchResultSetMetaData (false)
+
+    Normally when a ResultSet is returned its accompanying ResultSetMetaData isn't delivered. This only happens when someone calls getMetaData() on the ResultSet. If you always call getMetaData() on your ResultSets (say you do some kind of reflection on the ResultSet) it is more efficient to return the ResultSetMetaData together with the ResultSet as one remote call can be saved.
+
++----------------------------------------------------------------+
+Attention!
+
+Another problem strikes depending on your database driver: VJDBC serializes the ResultSet on the server-side so most of the time the server-side ResultSet-Cursor is "empty" (any next() call would return false) after VJDBC returns. Database drivers might be implemented in such a way that they close the ResultSet by themselves without waiting for the client to explicitly close it. But this is crucial for reading the ResultSetMetaData because you can't read the metadata of a closed ResultSet ! So here you also can use the prefetchResultSetMetaData flag. Or if you don't use ResultSetMetaData at all, you can just ignore it !
++----------------------------------------------------------------+
+
+    * compressionMode (bestspeed)
+
+    Compression mode to be used. Possible values: none, bestcompression or bestspeed.
+
+    * compressionThreshold (2000)
+
+    Threshold in number of bytes above which compression will be used. If the size of the data to be transported is lower than this threshold it will be delivered uncompressed because it doesn't really make a difference for the network load and speeds up both server and client because they don't need to compress/decompress the data.
+
+    * loginHandler
+
+    Fully qualified name of a class which implements the LoginHandler interface. This can be used to use another authentication mechanism than the standard db-user and -password combination.
+
+    * charset (ISO-8859-1)
+
+    There is a method called getBinaryStream() in the ResultSet interface which returns an InputStream for the data of a specific column. Because character data is transported as standard Java-UTF-8-Strings the client must have the information which encoding was originally used.
+
+    * traceCommandCount (false)
+
+    Debug-Flag. When its on VJDBC traces a statistic of the commands which were executed on a connection. This way often called commands can be identified and perhaps reduced.
+
+    * traceOrphanedObjects (false)
+
+    Debug-Flag. JDBC-Resources like Connections, Statements or ResultSets should always be freed with the close() method. VJDBC can track the points in the client program which caused the creation of these resources to easily find resource "leaks".
+
+    * <named-queries>
+
+    See Using Named-Queries for more details.
+
+    * <query-filters>
+
+    See Using Query-Filters for more details.
+
+      ref 1	(1, 2, 3) Either the Driver/URL-Combination or the DataSourceFactory must be specified. If both are specified the DataSource Factory is used
+      ref 2	(1, 2) If User/Password isn't specified in the configuration the VJDBC client must provide these properties
+
+* 3.3 Configuration Variables
+
+    Often there is a need to replace several settings in the configuration file with values specified during the deployment process. For example, you develop and test with the RMI registry running on port 2000, but in production you must use 3000. Instead of maintaining two almost identical configuration files or doing some magic during the deployment process you can use configuration variables. Configuration variables are specified in a seperate properties file and can replace almost any value within the configuration file.
+
+    Here is an example which covers the mentioned use case with the registry port and specifying a different remoting port.
+
++----------------------------------------------------------------+
+<vjdbc-configuration>
+    <rmi registryPort="${rmi.registryPort}" remotingPort="${rmi.remotingPort}"/>
+    ...
+</vjdbc-configuration>
++----------------------------------------------------------------+
+
+    Now you have to provide an additional properties file that contains all variables that are used in the configuration.
+
++----------------------------------------------------------------+
+rmi.registryPort=2001
+rmi.remotingPort=9092
++----------------------------------------------------------------+
+
+* 3.4 Programmatic Configuration
+
+    The XML configuration is actually translated by Jakarta-Digester into a structure of configuration objects. These objects can be built programmatically for usage. You can for example embed a VJDBC RMI-Server into an already running server process by using this approach; no need for external configuration files anymore.
+
++----------------------------------------------------------------+
+public class CustomRmiServer {
+    public static void main(String[] args) {
+        BasicConfigurator.configure();
+        Logger.getRootLogger().setLevel(Level.INFO);
+
+        try {
+            // Initialize VJDBC programmatically
+            System.out.println("Initializing VJDBC");
+            VJdbcConfiguration vjdbcConfig = new VJdbcConfiguration();
+
+            // Connection-Configuration for Oracle
+            ConnectionConfiguration configOracle = new ConnectionConfiguration();
+            configOracle.setDriver("oracle.jdbc.OracleDriver");
+            configOracle.setId("OracleDB");
+            configOracle.setUrl("jdbc:oracle:oci:@");
+            configOracle.setConnectionPooling(true);
+            vjdbcConfig.addConnection(configOracle);
+
+            // Connection-Configuration for Oracle
+            ConnectionConfiguration configOdbc = new ConnectionConfiguration();
+            configOdbc.setDriver("sun.jdbc.odbc.JdbcOdbcDriver");
+            configOdbc.setId("MyDB");
+            configOdbc.setUrl("jdbc:odbc:testdb");
+            configOdbc.setConnectionPooling(true);
+            vjdbcConfig.addConnection(configOdbc);
+
+            // Finally initialize VJDBC and start the server
+            VJdbcConfiguration.init(vjdbcConfig);
+            ConnectionServer server = new ConnectionServer();
+            server.serve();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
++----------------------------------------------------------------+
+
+* 3.5 Client-Side Properties
+
+    You can set different VJDBC-specific properties in the Properties-Object that is passed to the getConnection-Method of the DriverManager. Use the static strings in the VJdbcProperties class as the keys.
+
+      * VJdbcProperties.LOGIN_USER
+
+      User-Id which will be used by the optional LoginHandler on the server to verify the access of the user (don't mix this up with the database user-id)
+
+      * VJdbcProperties.LOGIN_PASSWORD
+
+      Password for the user.
+
+      * VJdbcProperties.CLIENTINFO_PROPERTIES
+
+      VJDBC can pass client-side system properties to the server which logs them when the connection is closed. This can be used to monitor which users connect, what operation system the client runs on etc. Just pass a list of the property keys in a semicolon-separated string (i. e. user.name;java.version;os.name)
+
+      * VJdbcProperties.RMI_SSL
+
+      Signaling using of SSL sockets for RMI communication (true or false, default: false)
+
+      * VJdbcProperties.SERVLET_USE_JAKARTA_HTTP_CLIENT
+
+      Switch to use Jakarta HttpClient to connect to the VJDBC-Servlet (true or false, default: false). The commons-httpclient and commons-codec jars must be included in the classpath of the client.
+
+      * VJdbcProperties.SERVLET_REQUEST_ENHANCER_FACTORY
+
+      Name of a class that implements the de.simplicit.vjdbc.servlet.RequestEnhancerFactory interface. If this property is set VJDBC will call the implementing class to create a RequestEnhancer for each VJDBC-Servlet-Connection. See Using Request-Enhancers for more details.
+
+      * VJdbcProperties.CACHE_TABLES
+
+      List of tables which will be cached on the client by using HSQL-DB. Format of the string is 
++----------------------------------------------------------------+
+tablename[:refresh-interval],tablename[:refresh-interval]...
++----------------------------------------------------------------+
+
+* 3.6 Advanced configuration
+
+** 3.6.1 Using DataSources
+
+      By default VJDBC gets the connection to the backend database by using a standard JDBC-URL.
+
+      Java 1.4 introduced the DataSource-API as an alternative. The DataSource-API is more flexible and easier to use in environments such as application servers or directory services.
+
+      To get VJDBC working with the DataSource-API you need to provide a class that implements the DataSourceProvider interface. You must then specify this class in the VJDBC-Configuration. VJDBC will instantiate this class (thus it must have a constructor without parameters) and call the getDataSource() method to finally get the DataSource.
+
+      A simple example using HSQL-DB. First the very basic implementation of a DataSource class. This is just for demonstration purposes, you normally wouldn't implement this class but use the class provided by your database vendor.
+
++----------------------------------------------------------------+
+/*
+Simple DataSource implementation
+*/
+public class HSqlDataSource implements DataSource {
+    public HSqlDataSource() throws SQLException {
+        try {
+            Class.forName("org.hsqldb.jdbcDriver");
+        } catch (ClassNotFoundException e) {
+            throw new SQLException(e.getMessage());
+        }
+    }
+
+    ...
+
+    public Connection getConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:hsqldb:.");
+    }
+
+    public Connection getConnection(String username, String password) throws SQLException {
+        return DriverManager.getConnection("jdbc:hsqldb:.", username, password);
+    }
+}
++----------------------------------------------------------------+
+
+      Now the DataSourceProvider implementation for VJDBC
+
++----------------------------------------------------------------+
+package de.simplicit.vjdbc.test.junit.hsqldb;
+
+import java.sql.SQLException;
+import javax.sql.DataSource;
+import de.simplicit.vjdbc.server.DataSourceProvider;
+
+public class HSqlDataSourceProvider implements DataSourceProvider {
+    public DataSource getDataSource() throws SQLException {
+        return new HSqlDataSource();
+    }
+}
++----------------------------------------------------------------+
+
+      Finally we must specify the DataSourceProvider class in our configuration
+
++----------------------------------------------------------------+
+<connection
+    id="HSqlDB-DataSource"
+    dataSourceProvider="de.simplicit.vjdbc.test.junit.hsqldb.HSqlDataSourceProvider"
+    user="sa"
+    password=""
+    ...
++----------------------------------------------------------------+
+
+** 3.6.2 Using LoginHandlers
+
+      VJDBC behaves like a normal JDBC driver so it is necessary to provide user and password for the database login.
+      This can be a problem because you must specify the user/password combination on the client side. A malicious user could look into the Java byte code to find the user/password information and then try to login to the database completely out of the context of the original scenario. Bad things can happen when this user-login has advanced privileges ...
+      VJDBC offers a simple mechanism to replace the database login with a different login mechanism (JAAS for example). To use this mechanism you must provide a LoginHandler class which checks the credentials of the client.
+      The following example explains the concept. Say you want to manage the VJDBC users with an ordinary properties file called user.properties.
+
++----------------------------------------------------------------+
+# Format
+# User=Password
+mike=secret
+gerry=cool
++----------------------------------------------------------------+
+
+      Now write the class that implements the LoginHandler interface and reads the user.properties file
+
++----------------------------------------------------------------+
+package de.simplicit.vjdbc.test;
+
+import de.simplicit.vjdbc.VJdbcException;
+import de.simplicit.vjdbc.server.LoginHandler;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+public class SimpleLoginHandler implements LoginHandler {
+    private Properties _properties = new Properties();
+
+    public SimpleLoginHandler() throws IOException {
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("de/simplicit/vjdbc/test/user.properties");
+        _properties.load(is);
+    }
+
+    // When the login of the user fails, just throw a VJdbcException
+    public void checkLogin(String user, String password) throws VJdbcException {
+        if (user != null) {
+            String pw = _properties.getProperty(user);
+
+            if (pw != null) {
+                if (!pw.equals(password)) {
+                    throw new VJdbcException("Password for user " + user + " is wrong");
+                }
+            } else {
+                throw new VJdbcException("Unknown user " + user);
+            }
+        } else {
+            throw new VJdbcException("User is null");
+        }
+    }
+}
++----------------------------------------------------------------+
+
++----------------------------------------------------------------+
+Attention!
+
+VJDBC differentiates between the user/password combination for the database and for the custom login mechanism. User/Password for the latter must be provided in the Properties object that is handed over to the DriverManager on the client side. Use the identifier provided by the VJdbcProperties class to put the information into the properties.
+
+Properties props = new Properties();
+props.setProperty(VJdbcProperties.LOGIN_USER, "mike");
+props.setProperty(VJdbcProperties.LOGIN_PASSWORD, "secret");
+
+_connection = DriverManager.getConnection("jdbc:vjdbc:rmi://localhost:2345/VJdbc,MyDB", props);
++----------------------------------------------------------------+
+
+** 3.6.3 Using Named-Queries
+
+      By using Named-Queries you can replace the SQL strings in your application with identifiers. VJDBC replaces these identifiers on-the-fly with the SQL statement that you provide with the configuration. An identifier starts with a dollar sign and must be unique for a connection configuration. The Named-Queries must be listed in the <named-queries> element of the connection:
+
++----------------------------------------------------------------+
+<connection
+    id="HSqlDB"
+    ...
+    <named-queries>
+        <entry id="selectAllAddresses">select * from Address</entry>
+        <entry id="updateAllAddresses">update Address set name = 'Balla' where name = 'Billi'</entry>
+        ...
+    </named-queries>
++----------------------------------------------------------------+
+
+      In the application you must pass the id-String preceded with a dollar-sign instead of SQL.
+
++----------------------------------------------------------------+
+Connection connVJdbc = createVJdbcConnection();
+PreparedStatement pstmt2 = connVJdbc.prepareStatement("$selectAllAddresses");
+ResultSet rs1 = pstmt1.executeQuery();
+...
++----------------------------------------------------------------+
+
+** 3.6.4 Using Query-Filters
+
+      With Query-Filters it is possible to check the supplied SQL against standard regular expressions. That way you can prevent malicious queries to come through to the backend database. Like Named-Queries the Query-Filters are specified in the configuration of VJDBC:
+
++----------------------------------------------------------------+
+<connection
+    id="HSqlDB"
+    driver="org.hsqldb.jdbcDriver"
+    url="jdbc:hsqldb:."
+            ...
+    <named-queries>
+        <entry id="selectAllAddresses">select * from Address</entry>
+        <entry id="updateAllAddresses">update Address set name = 'Balla' where name = 'Billi'</entry>
+    </named-queries>
+    <query-filters>
+        <allow>insert .+</allow>
+        <allow>SeLeCt .+</allow>
+        <allow>CREATE .+</allow>
+        <allow>update .+</allow>
+        <allow>drop table .+</allow>
+        <deny>.+</deny>
+    </query-filters>
+</connection>
++----------------------------------------------------------------+
+
+      Two types of Query-Filters are currently available, the Allow-Filter and the Deny-Filter. You can specify any number of those filters to create a complete chain of filters. VJDBC will check each SQL statement against those filters; if an Allow-Filter matches, the filter-check stops and the statement will be executed. If a Deny-Filter matches, the filter-check stops and a SQLException will be thrown to notify the client. If no match is found, the statement is NOT executed, so no malicious statements can fall through.
+      Query-Filters are case-insensitive as you can see in the example above.
+      By default all SQL strings are checked if they match the regular expression completely. You can also specify that the SQL string only contains the regex pattern by adding a type attribute to the filter. If you want to reject all SQL statements that contain "delete", you can specify the following Deny-Filter
+
++----------------------------------------------------------------+
+<deny type="contains">delete</deny>
++----------------------------------------------------------------+
+
+      This way you don't need to add regex characters for handling "noise" like white space.
+
+*** 3.6.4.1 Combining Named-Queries and Query-Filters
+
+        By combining Named-Queries and Query-Filters you can make your application flexible and secure. Named-Queries are not checked against Query-Filters after resolution of the identifier. Say you want to prevent the execution of "uncontrolled" Delete- and Drop-Statements. You could start with a configuration like this:
+
++----------------------------------------------------------------+
+<named-queries>
+    <entry id="deleteAddress">delete from Address where Id = ?</entry>
+</named-queries>
+<query-filters>
+    <deny type="contains">delete</deny>
+    <deny type="contains">drop</deny>
+</query-filters>
++----------------------------------------------------------------+
+
+        Here all Delete- and Drop-Statements are denied except the one specified in the Named-Query.
+
+** 3.6.5 Using Request-Enhancers
+
+      When you use VJDBC in Servlet-Mode each command that is sent to the server is actually an HTTP-Post-Request containing the usual data like request headers plus the request body containing the serialized VJDBC-Command.
+      There is a limited possibility to enhance these HTTP-Requests to transport your own application-specific connection data. This can be useful to send authentication information like cookies to the HTTP-Server (authentication besides the database authentication isn't handled by VJDBC).
+      Say you want to add an authentication cookie to each HTTP request. First you must implement the actual RequestEnhancer by implementing the corresponding interface. The following example shows that the RequestEnhancer must actually implement two methods, one for the initial connection when opening the VJDBC-Connection and one for each command that is processed over this connection. Each of these methods will be passed a RequestModifier object which currently has only one method called addRequestHeader(String key, String value).
+
++----------------------------------------------------------------+
+package com.startup;
+
+public class TestRequestEnhancer implements RequestEnhancer {
+    public void enhanceConnectRequest(RequestModifier requestModifier) {
+        // Here add the code for modification of the request, i. e.
+        requestModifier.addRequestHeader("connect-test-property", "connect-test-value");
+    }
+
+    public void enhanceProcessRequest(RequestModifier requestModifier) {
+        // Here add the code for modification of the request, i. e.
+        requestModifier.addRequestHeader("process-test-property", "process-test-value");
+    }
+}
++----------------------------------------------------------------+
+
+      After implementing the RequestEnhancer a second class must be provided which is a simple factory class that is used to instantiate your RequestEnhancer implementation. This class, the RequestEnhancerFactory is actually trivial to implement.
+
++----------------------------------------------------------------+
+package com.startup;
+
+public class TestRequestEnhancerFactory implements RequestEnhancerFactory {
+    public RequestEnhancer create() {
+        return new TestRequestEnhancer();
+    }
+}
++----------------------------------------------------------------+
+
+      Finally you must tell VJDBC to use your RequestEnhancer implementations by setting the corresponding property when opening the connection.
+
++----------------------------------------------------------------+
+...
+Properties props = new Properties();
+props.setProperty(VJdbcProperties.SERVLET_REQUEST_ENHANCER_FACTORY, "com.startup.TestRequestEnhancerFactory");
+Connection conn = DriverManager.getConnection(url, props);
+...
++----------------------------------------------------------------+
+
+      Request-Enhancing is implemented in a generic way for both JDK-URLConnection and Jakarta-HttpClient. You don't need to change the enhancer when you switch from URLConnection to HttpClient and vice versa.
+
+* 3.7 Logging
+
+    VJDBC uses the Jakarta-Package Commons-Logging for tracing information about what's happening at the moment. With Commons-Logging you can switch your Logging implementation very easily (i.e. from Log4J to JDK1.4-Logging or vice versa). There is even a simple logging implementation included for output on stderr.
+    To use Log4J-Logging you only have to include the Log4J-Package in the classpath plus a file called log4j.properties which must be reachable for the classloader. Nothing more to do!
+
+4. Vendor-Specific informations
+
+  VJDBC should work with any JDBC compliant driver but as always reality isn't 100%. All vendor specific issues will be collected and written down in the following chapters.
+
+* 4.1 Oracle 9i
+
+     * Driver: ojdbc14.jar, nls_charset12.jar
+
+    The Oracle thin driver seems to have a limit of 4k for CLOBs. The following code fragment produces an exception java.sql.SQLException: E/A-Exception: Connection reset
+
++----------------------------------------------------------------+
+// Creating the table
+    stmt.executeUpdate("create table clobs (id int, someclob clob)");
+    ...
+    // a little bit later I try to write some CLOBs
+    for(int i = 0; i < 1000; i++) {
+            sb.append("CLOBDATA");
+    }
+    String clobdata = sb.toString();
+    PreparedStatement pstmt = conn.prepareStatement("insert into clobs values(?, ?)");
+    for(int i = 1; i <= 10; i++) {
+            pstmt.setInt(1, i);
+            pstmt.setCharacterStream(2, new StringReader(clobdata), clobdata.length());
+            pstmt.executeUpdate();
+    }
+    pstmt.close();
++----------------------------------------------------------------+
+
+    When I set the upper-limit of the first for-loop to 100 (instead of 8000 characters there are 800 characters) everything works fine!
+
+* 4.2 DB2 8.2
+
+      * Driver: db2jcc.jar, db2jcc_license_cu.jar
+
+    This driver seems to close ResultSets when the last row was passed by the cursor. A succeeding getMetaData() call fails with "resultset is closed". The connection flag "prefetchResultSetMetaData" can be used to immediately read the meta data before the resultset is closed.

@@ -1,0 +1,1 @@
+This directory is the destination directory for the EAR- and WAR-Files created by the Build-Script.

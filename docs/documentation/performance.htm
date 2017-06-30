@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Performance</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="../vjdbc.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="headerfont">
+<p>Performance-Comparisons between Type-3-Drivers</p>
+<p class="textfont">Type-3-Drivers claim that they make a JDBC-Datasource transparently
+available over network boundaries. But this only makes sense when the performance is
+sufficient for the usage scenarios. It can be dangerous to develop with a native JDBC
+driver and then switch to a Type-3-Driver only to recognize that the performance drops
+dramatically and renders the application unusable. VJDBC is highly optimized and configurable
+for these scenarios.
+</p>
+<p class="textfont">Besides VJDBC there are some more Type-3-Drivers, both commercial and free.
+For the comparison the products <b>RmiJdbc</b> (free) and <b>Duality</b> (shareware) were chosen.
+</p>
+<p class="textfont">No special performance tests were written. The Hibernate persistence
+framework has an extensive set of unit tests which test both functionality and performance.
+I simply used the Hibernate unit tests (v2.1.8) in combination with HSQL-DB 1.7.3 and measured
+each test with
+</p>
+<ul class="textfont">
+<li>HSQL-DB Native-Driver</li>
+<li>VJDBC 1.2</li>
+<li>Duality (W1R044-01 A4, Trial Version)</li>
+<li>RmiJdbc 3.3</li>
+</ul>
+<p class="textfont">Below you see the results of these tests (15 tests) sorted descending by
+the time that the Native-Driver needed. Each column displays the factor which the Type-3-Driver
+needed to complete the test compared to the Native-Driver. As you can see the VJDBC performance
+is quite close to the Native-Driver while Duality and RmiJdbc perform 10 times worse than VJDBC
+in the longest running test.
+</p>
+<p class="textfont">All tests run locally to prevent side effects from networking. The compression
+feature of VJDBC was deactivated.</p>
+<p align="center" class="textfont"><img src="../img/performance.gif"></p>
+<p class="headerfont2">The Raw Numbers</p>
+<p class="textfont">Here the results of each test (values are in milliseconds). The longest running
+test FooBarTest didn't run with RmiJdbc because of an Out-Of-Memory-Exception after a long delay
+with 100% CPU usage.</p>
+<table class="textfont" x:str border=0 cellpadding=0 cellspacing=0 width=484 style='border-collapse:
+ collapse;table-layout:fixed;width:363pt'>
+ <col width=164 style='mso-width-source:userset;mso-width-alt:5997;width:123pt'>
+ <col width=80 span=4 style='width:60pt'>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl25 width=164 style='height:12.75pt;width:123pt'>&nbsp;</td>
+  <td align="right" class=xl26 width=80 style='border-left:none;width:60pt'><b>HSQL-DB</b></td>
+  <td align="right" class=xl26 width=80 style='border-left:none;width:60pt'><b>VJDBC 1.2</b></td>
+  <td align="right" class=xl26 width=80 style='border-left:none;width:60pt'><b>Duality</b></td>
+  <td align="right" class=xl26 width=80 style='border-left:none;width:60pt'><b>RmiJdbc</b></td>
+ </tr>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl27 style='height:12.75pt;border-top:none'><b>FooBarTest</b></td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>11978</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>31465</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>319239</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none'>-</td>
+ </tr>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl27 style='height:12.75pt;border-top:none'><b>ParentChildTest</b></td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>4086</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>6509</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>29382</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>63772</td>
+ </tr>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl27 style='height:12.75pt;border-top:none'><b>FumTest</b></td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>3625</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>4897</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>13048</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>18647</td>
+ </tr>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl27 style='height:12.75pt;border-top:none'><b>ODMGTest</b></td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>3164</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>3956</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>6810</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>5448</td>
+ </tr>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl27 style='height:12.75pt;border-top:none'><b>MultiTableTest</b></td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>2393</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>4617</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>11967</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>25316</td>
+ </tr>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl27 style='height:12.75pt;border-top:none'><b>MasterDetailTest</b></td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>2264</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>3205</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>9815</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>28491</td>
+ </tr>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl27 style='height:12.75pt;border-top:none'><b>SQLLoaderTest</b></td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>1913</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>2503</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>6660</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>12638</td>
+ </tr>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl27 style='height:12.75pt;border-top:none'><b>SQLFunctionsTest</b></td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>1843</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>2203</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>5217</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>8141</td>
+ </tr>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl27 style='height:12.75pt;border-top:none'><b>ABCProxyTest</b></td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>1752</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>2874</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>5878</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>6099</td>
+ </tr>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl27 style='height:12.75pt;border-top:none'><b>SessionCacheTest</b></td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>1523</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>1603</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>2464</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>1993</td>
+ </tr>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl27 style='height:12.75pt;border-top:none'><b>ABCTest</b></td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>1482</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>1732</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>2784</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>2574</td>
+ </tr>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl27 style='height:12.75pt;border-top:none'><b>QueryByExampleTest</b></td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>1362</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>1592</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>3045</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>3495</td>
+ </tr>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl27 style='height:12.75pt;border-top:none'><b>BlobClobTest</b></td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>1142</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>1312</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>1532</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>1592</td>
+ </tr>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl27 style='height:12.75pt;border-top:none'><b>CacheTest</b></td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>611</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>601</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>701</td>
+  <td class=xl24 align=right style='border-top:none;border-left:none' x:num>621</td>
+ </tr>
+</table>
+
+</body>
+</html>

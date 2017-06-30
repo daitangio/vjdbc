@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Untitled Document</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="../vjdbc.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="headerfont">
+<p>Quickstart</p>
+<p class="textfont">This very simple sample shows how to access a Microsoft Access 
+  database remotely with VJDBC. You should be familiar with creating Access databases 
+  and registering them as ODBC-Datasources in your Windows system.</p>
+<p class="textfont">1. Normally you would create a JDBC-Connection to an ODBC-Datasource 
+  called <strong>testdb</strong> this way:</p>
+<blockquote>
+  <p class="codefont"> Class.forName(&quot;sun.jdbc.odbc.JdbcOdbcDriver&quot;).newInstance();<br>
+    Connection conn = DriverManager.getConnection(&quot;jdbc:odbc:testdb&quot;);<br>
+    Statement stmt = conn.createStatement();<br>
+    ...</p>
+</blockquote>
+<p class="textfont">2. For using VJDBC you only need to change the driver class 
+  and the JDBC-String:</p>
+<blockquote> 
+  <p class="codefont"> Class.forName(&quot;de.simplicit.vjdbc.VirtualDriver&quot;).newInstance();<br>
+    Connection conn = DriverManager.getConnection(&quot;jdbc:vjdbc:rmi://localhost:2000/VJdbc,testdb&quot;);<br>
+    Statement stmt = conn.createStatement();<br>
+    ...</p>
+  <p class="textfont">As you can see the JDBC-String doesn't refer directly to 
+    the ODBC-Datasource anymore but specifies the location (localhost:2000) where 
+    a registered RMI-Object (VJdbc) is waiting for connections. For more information 
+    about the JDBC-String please jump directly to the <a href="reference.htm">reference</a>.</p>
+  <p class="textfont"><strong><font color="#FF0000">Important</font></strong> 
+    ! You need two additional JARs in your classpath: <span class="codefont">vjdbc.jar</span> and 
+    <span class="codefont">commons-logging.jar</span>.</p>
+</blockquote>
+<p class="textfont">3. Before you can start the RMI-Server you must create a small 
+  XML file which contains the information about the ODBC-Datasource and the JDBC-Driver. 
+  So create a file called <span class="codefont">vjdbc_jdbcodbc.xml</span> with 
+  this content:</p>
+<blockquote> 
+  <p class="codefont">&lt;vjdbc-configuration&gt;<br>
+    &nbsp;&nbsp;&lt;connection id=&quot;testdb&quot; driver=&quot;sun.jdbc.odbc.JdbcOdbcDriver&quot; 
+    url=&quot;jdbc:odbc:testdb&quot;/&gt;<br>
+    &lt;/vjdbc-configuration&gt;</p>
+  <span class="textfont">That's it ! There are some more <a href="reference.htm#General_properties">properties</a> 
+  for configuration but the default values are sufficient for now.</span> </blockquote>
+<p class="textfont">4. Now you must start the RMI-Server (don't forget to specify 
+  the previously created XML file as the one and only argument), use the JAR-Files 
+  from the lib-directory:</p>
+<blockquote> 
+  <p class="codefont">java -classpath<br>
+	vjdbc.jar;<br>
+	vjdbc_server.jar;<br>
+	commons-beanutils-core.jar;<br>
+	commons-collections-3.2.jar;<br>
+	commons-dbcp-1.2.1.jar;<br>
+	commons-digester-1.7.jar;<br>
+	commons-logging-1.1.jar;<br>
+	commons-pool-1.3.jar;<br>
+	jakarta-oro-2.0.8.jar;<br>
+	log4j-1.2.8.jar;<br>
+	de.simplicit.vjdbc.server.rmi.ConnectionServer<br>
+	vjdbc_jdbcodbc.xml</p>
+</blockquote>
+<p class="textfont">5. Finally you can start your client program ...</p>
+</body>
+</html>

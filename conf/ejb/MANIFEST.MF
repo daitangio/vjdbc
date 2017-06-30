@@ -1,0 +1,1 @@
+Class-Path: lib/vjdbc.jar lib/vjdbc_server.jar lib/commons-pool.jar lib/commons-logging.jar lib/commons-dbcp-1.1.jar lib/commons-collections.jar lib/rowset.jar lib/j2ee.jar
