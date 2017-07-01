@@ -63,10 +63,13 @@ it makes me really proud.
 TODO
 ---------------
 + Consider incorporating fixes from https://github.com/AugeoSoftware/VJDBC
-+ Consider replacing
++ Replaced
    de.simplicit.vjdbc.server.concurrent
   with the jdk concurrent package (probably more secure).
+  Anyway it seems used only on an obscure 
 
-+ Code base is old but seems well written, even with a statistical log upone disconnect.
++ Code base is old and not perfect.
+  The config class has an executor (a bit weird....)
+  A statistical log is included upone disconnect.
   There was some minor bad code eclipse catches (null pointer access, but only few).
 

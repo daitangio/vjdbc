@@ -60,6 +60,16 @@ public class SuperSimpleHSqlTest extends TestSuite {
 		connVJdbc.commit();
 	}
 
+	@Test
+	public void testSelect() throws SQLException {
+		ResultSet rs=connVJdbc.createStatement().executeQuery("select * from Address");
+		while(rs.next()) {
+			// Consume....
+		}
+		rs.close();
+		/// bye		
+	}
+
 	@Test 
 	public void test2_ConfiguredStatement() throws SQLException {
 
@@ -68,8 +78,6 @@ public class SuperSimpleHSqlTest extends TestSuite {
 		stmt1.addBatch("$updateAllAddresses");
 		stmt1.executeBatch();
 		stmt1.close();
-
-
 	}
 
 	private void createTestData(Connection connVJdbc) throws SQLException {
