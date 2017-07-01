@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.*;
+import java.util.Map.Entry;
 
 class ConnectionEntry implements ConnectionContext {
 	private static Log _logger = LogFactory.getLog(ConnectionEntry.class);
@@ -185,7 +186,12 @@ class ConnectionEntry implements ConnectionContext {
 
 				if(target != null) {
 					if(_logger.isDebugEnabled()) {
-						_logger.debug("Target for UID " + uid + " found");
+						//GG Uselsess _logger.debug("Target for UID " + uid + " found");
+
+						for(Entry<Long, JdbcObjectHolder> e:_jdbcObjects.entrySet()) {
+							_logger.debug(""+e.getKey()+")"+e.getValue());
+						}
+
 					}
 					// Execute the command on the target object
 					result = cmd.execute(target.getJdbcObject(), this);

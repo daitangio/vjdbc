@@ -36,6 +36,9 @@ import de.simplicit.vjdbc.util.SQLExceptionHelper;
  * client to the responsible connection object.
  */
 public class CommandProcessor {
+
+	public static final int MAX_LOG_SIZE = 80*3;
+
 	private static Log _logger = LogFactory.getLog(CommandProcessor.class);
 	private static CommandProcessor _singleton;
 
@@ -169,8 +172,17 @@ public class CommandProcessor {
 	public Object process(Long connuid, Long uid, Command cmd, CallingContext ctx) throws SQLException {
 		Object result = null;
 
+		String cmdStr = cmd.toString();
 		if(_logger.isDebugEnabled()) {
-			_logger.debug(cmd);
+			String cmdLimited;
+
+			if(cmdStr.length() > MAX_LOG_SIZE ) {
+				cmdLimited=cmdStr.substring(0, MAX_LOG_SIZE-1)+"...";
+			}else {
+				cmdLimited=cmdStr;
+			}
+			_logger.debug("[ "+connuid+", "+uid
+					+ " ] Processing" + cmdLimited);
 		}
 
 		if(connuid != null) {
@@ -217,7 +229,7 @@ public class CommandProcessor {
 				if(cmd instanceof DestroyCommand) {
 					_logger.debug("Connection entry already gone, DestroyCommand will be ignored");
 				} else {
-					String msg = "Unknown connection entry " + connuid + " for command " + cmd.toString();
+					String msg = "Unknown connection entry " + connuid + " for command " + cmdStr;
 					_logger.error(msg);
 					throw new SQLException(msg);
 				}
