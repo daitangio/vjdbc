@@ -11,9 +11,8 @@ Improvements over original release  (svn revision 72)
 + Added HSQL compile dependency because used for caches and testing.
 
 
-+ TODO
-Consider incorporating fixes from https://github.com/AugeoSoftware/VJDBC
- 
+
+
 
 Instructions
 ------------
@@ -60,3 +59,14 @@ aren't listed on the Sourceforge-Page but the payments definitively arrived.
 
 It's really exciting to see that VJDBC is used in production environments but to get paid for
 it makes me really proud.
+
+TODO
+---------------
++ Consider incorporating fixes from https://github.com/AugeoSoftware/VJDBC
++ Consider replacing
+   de.simplicit.vjdbc.server.concurrent
+  with the jdk concurrent package (probably more secure).
+
++ Code base is old but seems well written, even with a statistical log upone disconnect.
+  There was some minor bad code eclipse catches (null pointer access, but only few).
+

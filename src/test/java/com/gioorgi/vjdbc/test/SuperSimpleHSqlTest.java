@@ -7,9 +7,12 @@ import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import de.simplicit.vjdbc.serial.StreamSerializer;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -17,11 +20,11 @@ import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 
-public class SuperSimpleHSqlTest{
+public class SuperSimpleHSqlTest extends TestSuite {
 
 	protected Logger logger=Logger.getLogger(getClass());
 
-	private static final int NUMBER_OF_ADDRESSES = 1234;
+	private static final int NUMBER_OF_ADDRESSES = 64;
 
 	protected DateFormat _dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
 	@BeforeClass
@@ -45,6 +48,7 @@ public class SuperSimpleHSqlTest{
 		connVJdbc.close();
 	}
 
+
 	@Test
 	public void test1_SimpleCreate() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		logger.info("Connecting to test db....and creating some tables");
@@ -52,7 +56,18 @@ public class SuperSimpleHSqlTest{
 
 		connVJdbc.setAutoCommit(false);
 		createTestData(connVJdbc);
+
 		connVJdbc.commit();
+	}
+
+	@Test 
+	public void test2_ConfiguredStatement() throws SQLException {
+
+		Statement stmt1 = connVJdbc.createStatement();
+		// Also test prepared statement
+		stmt1.addBatch("$updateAllAddresses");
+		stmt1.executeBatch();
+		stmt1.close();
 
 
 	}

@@ -79,6 +79,7 @@ public class CommandProcessor {
 	private static void installShutdownHook() {
 		// Install the shutdown hook
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			@Override
 			public void run() {
 				getInstance().destroy();
 			}
@@ -181,8 +182,8 @@ public class CommandProcessor {
 			}else {
 				cmdLimited=cmdStr;
 			}
-			_logger.debug("[ "+connuid+", "+uid
-					+ " ] Processing" + cmdLimited);
+			_logger.debug("[ C:"+connuid+", UID:"+uid
+					+ " ] Processing:" + cmdLimited);
 		}
 
 		if(connuid != null) {
@@ -253,7 +254,7 @@ public class CommandProcessor {
 		@Override
 		public void run() {
 			try {
-				_logger.debug("Checking for orphaned connections ..."+_connectionEntries.keySet().size());
+				_logger.trace("Checking for orphaned connections ..."+_connectionEntries.keySet().size());
 
 				long millis = System.currentTimeMillis();
 

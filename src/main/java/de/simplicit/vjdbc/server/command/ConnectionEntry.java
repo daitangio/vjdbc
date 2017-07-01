@@ -84,6 +84,7 @@ class ConnectionEntry implements ConnectionContext {
 		}
 	}
 
+	@Override
 	public void closeAllRelatedJdbcObjects() throws SQLException {
 		Set<Long> keys = null;
 		synchronized(_jdbcObjects) {
@@ -122,6 +123,7 @@ class ConnectionEntry implements ConnectionContext {
 		return _numberOfProcessedCommands;
 	}
 
+	@Override
 	public Object getJDBCObject(Long key) {
 		JdbcObjectHolder jdbcObjectHolder = _jdbcObjects.get(key);
 		if(jdbcObjectHolder != null) {
@@ -131,11 +133,13 @@ class ConnectionEntry implements ConnectionContext {
 		}
 	}
 
+	@Override
 	public void addJDBCObject(Long key, Object partner) {
 		int _jdbcInterfaceType = getJdbcInterfaceTypeFromObject(partner);
 		_jdbcObjects.put(key, new JdbcObjectHolder(partner, null, _jdbcInterfaceType));
 	}
 
+	@Override
 	public Object removeJDBCObject(Long key) {
 		JdbcObjectHolder jdbcObjectHolder = _jdbcObjects.remove(key);
 		if(jdbcObjectHolder != null) {
@@ -145,25 +149,31 @@ class ConnectionEntry implements ConnectionContext {
 		}
 	}
 
+	@Override
 	public int getCompressionMode() {
 		return _connectionConfiguration.getCompressionModeAsInt();
 	}
 
+	@Override
 	public long getCompressionThreshold() {
 		return _connectionConfiguration.getCompressionThreshold();
 	}
 
+	@Override
 	public int getRowPacketSize() {
 		return _connectionConfiguration.getRowPacketSize();
 	}
 
+	@Override
 	public String getCharset() {
 		return _connectionConfiguration.getCharset();
 	}
 
+	@Override
 	public String resolveOrCheckQuery(String sql) throws SQLException
 	{
 		if (sql.startsWith("$")) {
+			_logger.debug("Named Query requested:"+sql);
 			return getNamedQuery(sql.substring(1));
 		}
 		else {
@@ -305,6 +315,7 @@ class ConnectionEntry implements ConnectionContext {
 
 			ArrayList entries = new ArrayList(_commandCountMap.entrySet());
 			Collections.sort(entries, new Comparator() {
+				@Override
 				public int compare(Object o1, Object o2) {
 					Map.Entry e1 = (Map.Entry) o1;
 					Map.Entry e2 = (Map.Entry) o2;
