@@ -1,0 +1,41 @@
+<vjdbc-configuration>
+
+	<connection 
+		id="testdb" 
+		driver="org.hsqldb.jdbcDriver" 
+		url="jdbc:hsqldb:./test/testdb/testremote.db"
+		user="sa"
+       	password="">
+       	<named-queries>
+        	<entry id="selectAllAddresses">select * from Address</entry>
+        	<entry id="selectAddress">select * from Address where Id = ?</entry>
+        	<entry id="updateAllAddresses">update Address set lastname = 'Billi' where lastname = 'Balla'</entry>
+    	</named-queries>
+    	<connection-pool
+                   maxActive="20"
+                   maxIdle="10"
+                   maxWait="10000"
+                   timeBetweenEvictionRunsMillis="50000"
+                   minEvictableIdleTimeMillis="100000"/>
+	</connection>
+  <!-- 
+	<connection 
+		id="HSqlDB" 
+		driver="org.hsqldb.jdbcDriver" 
+		url="jdbc:hsqldb:hsql://localhost/HSqlDb"
+		user="sa"
+       	password="">
+       	<named-queries>
+        	<entry id="selectAllAddresses">select * from Address</entry>
+        	<entry id="selectAddress">select * from Address where Id = ?</entry>
+        	<entry id="updateAllAddresses">update Address set lastname = 'Billi' where lastname = 'Balla'</entry>
+    	</named-queries>
+    	<connection-pool
+                   maxActive="20"
+                   maxIdle="10"
+                   maxWait="10000"
+                   timeBetweenEvictionRunsMillis="5000"
+                   minEvictableIdleTimeMillis="10000"/>
+	</connection>
+ -->
+</vjdbc-configuration>
