@@ -57,7 +57,11 @@ public class SuperSimpleHSqlTest extends TestSuite {
 		connVJdbc.setAutoCommit(false);
 		createTestData(connVJdbc);
 
+		ResultSet rs=connVJdbc.createStatement().executeQuery("select count(*)  from Address");
+		rs.next();
+		String count=(""+rs.getObject(1));
 		connVJdbc.commit();
+		assertEquals(NUMBER_OF_ADDRESSES+"", count);
 	}
 
 	@Test

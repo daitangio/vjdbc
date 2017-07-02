@@ -45,7 +45,7 @@ public class ConnectionConfiguration implements Executor {
 	protected boolean _traceOrphanedObjects = false;
 	// Row-Packet size defines the number of rows that is
 	// transported in one packet
-	protected int _rowPacketSize = 200;
+	protected int _rowPacketSize = 1000;
 	// Encoding for strings
 	protected String _charset = "ISO-8859-1";
 	// Compression
