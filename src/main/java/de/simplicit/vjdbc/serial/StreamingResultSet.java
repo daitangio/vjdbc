@@ -1471,7 +1471,7 @@ public class StreamingResultSet implements ResultSet, Externalizable {
 		Timestamp timestamp = getTimestamp(columnIndex);
 		if(timestamp != null) {
 			cal.setTime(timestamp);
-			return (Timestamp)cal.getTime();
+			return new Timestamp(cal.getTime().getTime());
 		}
 		else {
 			return null;
