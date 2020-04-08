@@ -9,7 +9,6 @@ import de.simplicit.vjdbc.server.config.RmiConfiguration;
 import de.simplicit.vjdbc.server.config.VJdbcConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.BasicConfigurator;
 
 import java.io.FileInputStream;
 import java.io.IOException;

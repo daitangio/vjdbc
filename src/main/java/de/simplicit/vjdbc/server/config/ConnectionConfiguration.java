@@ -318,6 +318,7 @@ public class ConnectionConfiguration implements Executor {
 		_logger.info("  Login-Handler .............. " + (_loginHandler != null ? _loginHandler : "none"));
 		_logger.info("  Trace Command-Counts ....... " + _traceCommandCount);
 		_logger.info("  Trace Orphaned-Objects ..... " + _traceOrphanedObjects);
+        _logger.info("  Ignore SQL Feature Errors... " + _ignoreSQLFeatureNotSupportedExceptions);
 
 		if(_connectionPoolConfiguration != null) {
 			_connectionPoolConfiguration.log();
