@@ -208,7 +208,11 @@ class ConnectionEntry implements ConnectionContext {
                                         try {
                                             result = cmd.execute(target.getJdbcObject(), this);
                                         } catch(SQLFeatureNotSupportedException featureNotSupportedEx) {
-                                            _logger.warn("Eating SQLFeatureNotSupportedException and using a null return value");
+                                            if(_connectionConfiguration.isIgnoreSQLFeatureNotSupportedExceptions()) {
+                                                _logger.warn("Eating SQLFeatureNotSupportedException and using a null return value");
+                                            } else {
+                                                throw featureNotSupportedEx;
+                                            }
                                         }
 					// Check if the result must be remembered on the server side with a UID
 					UIDEx uidResult = ReturnedObjectGuard.checkResult(result);

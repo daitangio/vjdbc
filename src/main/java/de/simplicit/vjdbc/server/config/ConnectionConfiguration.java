@@ -63,6 +63,8 @@ public class ConnectionConfiguration implements Executor {
 	protected NamedQueryConfiguration _namedQueries;
 	// Query filters
 	protected QueryFilterConfiguration _queryFilters;
+        // Ignore SQLFeatureNotSupportedExceptions
+        protected boolean _ignoreSQLFeatureNotSupportedExceptions;
 
 	// Connection pooling support
 	private boolean _driverInitialized = false;
@@ -255,6 +257,14 @@ public class ConnectionConfiguration implements Executor {
 	public void setQueryFilters(QueryFilterConfiguration queryFilters) {
 		_queryFilters = queryFilters;
 	}
+
+        public boolean isIgnoreSQLFeatureNotSupportedExceptions() {
+            return _ignoreSQLFeatureNotSupportedExceptions;
+        }
+
+        public void setIgnoreSQLFeatureNotSupportedExceptions(boolean _ignoreSQLFeatureNotSupportedExceptions) {
+            this._ignoreSQLFeatureNotSupportedExceptions = _ignoreSQLFeatureNotSupportedExceptions;
+        }
 
 	void validate() throws ConfigurationException {
 		if(_url == null && (_dataSourceProvider == null)) {

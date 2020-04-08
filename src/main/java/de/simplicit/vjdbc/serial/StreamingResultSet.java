@@ -187,9 +187,11 @@ public class StreamingResultSet implements ResultSet, Externalizable {
 			}
 			_remainingResultSet = null;
 		}
-		if (((VirtualStatement)_statement).isCloseOnCompletion()) {
-			_statement.close();
-		}
+                if(_statement != null) {
+                    if (((VirtualStatement)_statement).isCloseOnCompletion()) {
+                            _statement.close();
+                    }
+                }
 	}
 
 	@Override
