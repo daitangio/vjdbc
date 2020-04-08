@@ -28,6 +28,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.*;
@@ -204,7 +205,11 @@ class ConnectionEntry implements ConnectionContext {
 
 					}
 					// Execute the command on the target object
-					result = cmd.execute(target.getJdbcObject(), this);
+                                        try {
+                                            result = cmd.execute(target.getJdbcObject(), this);
+                                        } catch(SQLFeatureNotSupportedException featureNotSupportedEx) {
+                                            _logger.warn("Eating SQLFeatureNotSupportedException and using a null return value");
+                                        }
 					// Check if the result must be remembered on the server side with a UID
 					UIDEx uidResult = ReturnedObjectGuard.checkResult(result);
 

@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.rmi.PortableRemoteObject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,7 +26,6 @@ import de.simplicit.vjdbc.command.CommandSink;
 import de.simplicit.vjdbc.command.DecoratedCommandSink;
 import de.simplicit.vjdbc.command.NullCallingContextFactory;
 import de.simplicit.vjdbc.command.StandardCallingContextFactory;
-import de.simplicit.vjdbc.ejb.EjbCommandSink;
 import de.simplicit.vjdbc.ejb.EjbCommandSinkProxy;
 import de.simplicit.vjdbc.rmi.CommandSinkRmi;
 import de.simplicit.vjdbc.rmi.CommandSinkRmiProxy;
