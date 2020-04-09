@@ -5,8 +5,6 @@
 package de.simplicit.vjdbc.command;
 
 import de.simplicit.vjdbc.serial.UIDEx;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -14,11 +12,13 @@ import java.io.ObjectOutput;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DestroyCommand implements Command {
     static final long serialVersionUID = 4457392123395584636L;
 
-    private static Log _logger = LogFactory.getLog(DestroyCommand.class);
+	private static Logger _logger = Logger.getLogger(DestroyCommand.class.getName());
     private Long _uid;
     private int _interfaceType;
 
@@ -51,11 +51,11 @@ public class DestroyCommand implements Command {
     	 * JDBC objects, such as ResultSet, Statements, etc.
     	 */
     	if(target instanceof Connection) {
-    		if(_logger.isDebugEnabled()) {
-    			_logger.debug("******************************************************");
-    			_logger.debug("Destroy command for Connection found!");
-    			_logger.debug("destroying and closing all related JDBC objects first.");
-    			_logger.debug("******************************************************");
+    		if(_logger.isLoggable(Level.FINE)) {
+    			_logger.fine("******************************************************");
+    			_logger.fine("Destroy command for Connection found!");
+    			_logger.fine("destroying and closing all related JDBC objects first.");
+    			_logger.fine("******************************************************");
     		}
     		ctx.closeAllRelatedJdbcObjects();
     	}
@@ -65,29 +65,28 @@ public class DestroyCommand implements Command {
 
         // Check for identity
         if(removed == target) {
-            if(_logger.isDebugEnabled()) {
-                _logger.debug("Removed " + target.getClass().getName() + " with UID " + _uid);
+            if(_logger.isLoggable(Level.FINE)) {
+                _logger.fine("Removed " + target.getClass().getName() + " with UID " + _uid);
             }
             try {
                 Class targetClass = JdbcInterfaceType._interfaces[_interfaceType];
                 Method mth = targetClass.getDeclaredMethod("close", new Class[0]);
                 mth.invoke(target, (Object[])null);
-                if(_logger.isDebugEnabled()) {
-                    _logger.debug("Invoked close() successfully");
+                if(_logger.isLoggable(Level.FINE)) {
+                    _logger.fine("Invoked close() successfully");
                 }
             } catch(NoSuchMethodException e) {
                 // Object doesn't support close()
-            	if(_logger.isDebugEnabled()) {
-            		_logger.debug("close() not supported");
+            	if(_logger.isLoggable(Level.FINE)) {
+            		_logger.fine("close() not supported");
             	}
             } catch(Exception e) {
-                if(_logger.isDebugEnabled()) {
-                    _logger.debug("Invocation of close() failed", e);
-                }
+                _logger.severe("Invocation of close() failed");
+                e.printStackTrace();
             }
         } else {
-            if(_logger.isWarnEnabled()) {
-                _logger.warn("Target object " + target + " wasn't registered with UID " + _uid);
+            if(_logger.isLoggable(Level.FINE)) {
+                _logger.fine("Target object " + target + " wasn't registered with UID " + _uid);
             }
         }
         return null;

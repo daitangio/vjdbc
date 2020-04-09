@@ -9,8 +9,6 @@ import de.simplicit.vjdbc.util.JavaVersionInfo;
 import de.simplicit.vjdbc.util.SQLExceptionHelper;
 import de.simplicit.vjdbc.VirtualStatement;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -18,11 +16,12 @@ import java.net.URL;
 import java.sql.*;
 import java.util.Calendar;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class StreamingResultSet implements ResultSet, Externalizable {
 	static final long serialVersionUID = 8291019975153433161L;
 
-	private static Log _logger = LogFactory.getLog(StreamingResultSet.class);
+	private static Logger _logger = Logger.getLogger(StreamingResultSet.class.getName());
 
 	private int[] _columnTypes;
 	private String[] _columnNames;
@@ -109,7 +108,7 @@ public class StreamingResultSet implements ResultSet, Externalizable {
 		// Fetch the meta data immediately if required. Succeeding getMetaData() calls
 		// on the ResultSet won't require an additional remote call
 		if(_prefetchMetaData) {
-			_logger.debug("Fetching MetaData of ResultSet");
+			_logger.fine("Fetching MetaData of ResultSet");
 			_metaData = new SerialResultSetMetaData(metaData);
 		}
 

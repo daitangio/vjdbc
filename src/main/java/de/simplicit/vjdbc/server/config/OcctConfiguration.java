@@ -4,16 +4,22 @@
 
 package de.simplicit.vjdbc.server.config;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.logging.Logger;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 
 /**
  * This class holds configuration information for the OCCT.
  */
-public class OcctConfiguration {
-    private static Log _logger = LogFactory.getLog(OcctConfiguration.class);
 
+@XmlAccessorType(XmlAccessType.FIELD)
+public class OcctConfiguration {
+    private static Logger _logger = Logger.getLogger(OcctConfiguration.class.getName());
+
+    @XmlAttribute(name = "checkingPeriod")
     private long _checkingPeriod = 30000;
+    @XmlAttribute(name = "timeout")
     private long _timeout = 120000;
 
     public OcctConfiguration() {
@@ -24,12 +30,7 @@ public class OcctConfiguration {
     }
 
     public void setCheckingPeriodInMillis(long checkingPeriod) {
-        if(checkingPeriod != 0 && checkingPeriod <= 1000) {
-            _logger.error("Checking-Period must be greater than 1 second");
-        }
-        else {
-            _checkingPeriod = checkingPeriod;
-        }
+        _checkingPeriod = checkingPeriod;
     }
 
     public long getTimeoutInMillis() {
@@ -37,11 +38,15 @@ public class OcctConfiguration {
     }
 
     public void setTimeoutInMillis(long timeout) {
-        if(timeout > 0 && timeout <= 1000) {
-            _logger.error("Timeout must be greater than 1 second " + timeout);
+        _timeout = timeout;
+    }
+    
+    public void validate() throws Exception {
+        if(_checkingPeriod != 0 && _checkingPeriod <= 1000) {
+            throw new Exception("Checking-Period must be greater than 1 second");
         }
-        else {
-            _timeout = timeout;
+        if(_timeout > 0 && _timeout <= 1000) {
+            throw new Exception("Timeout must be greater than 1 second " + _timeout);
         }
     }
 

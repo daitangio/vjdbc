@@ -15,33 +15,23 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import de.simplicit.vjdbc.command.CallingContextFactory;
 import de.simplicit.vjdbc.command.CommandSink;
 import de.simplicit.vjdbc.command.DecoratedCommandSink;
 import de.simplicit.vjdbc.command.NullCallingContextFactory;
 import de.simplicit.vjdbc.command.StandardCallingContextFactory;
-import de.simplicit.vjdbc.ejb.EjbCommandSinkProxy;
 import de.simplicit.vjdbc.rmi.CommandSinkRmi;
 import de.simplicit.vjdbc.rmi.CommandSinkRmiProxy;
 import de.simplicit.vjdbc.rmi.ConnectionBrokerRmi;
 import de.simplicit.vjdbc.rmi.SecureSocketFactory;
 import de.simplicit.vjdbc.serial.CallingContext;
 import de.simplicit.vjdbc.serial.UIDEx;
-import de.simplicit.vjdbc.servlet.RequestEnhancer;
-import de.simplicit.vjdbc.servlet.RequestEnhancerFactory;
-import de.simplicit.vjdbc.servlet.ServletCommandSinkJdkHttpClient;
-import de.simplicit.vjdbc.servlet.jakarta.ServletCommandSinkJakartaHttpClient;
 import de.simplicit.vjdbc.util.ClientInfo;
 import de.simplicit.vjdbc.util.SQLExceptionHelper;
 
 public final class VirtualDriver implements Driver {
-    private static Log _logger = LogFactory.getLog(VirtualDriver.class);
+	private static Logger _logger = Logger.getLogger(VirtualDriver.class.getName());
 
     private static final String VJDBC_IDENTIFIER = "jdbc:vjdbc:";
     private static final String EJB_IDENTIFIER = "ejb:";
@@ -65,11 +55,11 @@ public final class VirtualDriver implements Driver {
                 _logger.info("Couldn't load HSQL-Driver, caching deactivated");
                 _cacheEnabled = false;
             } catch(Exception e) {
-                _logger.error("Unexpected exception occured on loading the HSQL-Driver");
+                _logger.severe("Unexpected exception occured on loading the HSQL-Driver");
                 _cacheEnabled = false;
             }
         } catch(Exception e) {
-            _logger.fatal("Couldn't register Virtual-JDBC-Driver !", e);
+            _logger.severe("Couldn't register Virtual-JDBC-Driver !");
             throw new RuntimeException("Couldn't register Virtual-JDBC-Driver !", e);
         }
     }
@@ -90,13 +80,8 @@ public final class VirtualDriver implements Driver {
 
                 String[] urlparts;
 
-                // EJB-Connection
-                if(realUrl.startsWith(EJB_IDENTIFIER)) {
-                    urlparts = split(realUrl.substring(EJB_IDENTIFIER.length()));
-                    _logger.info("VJdbc in EJB-Mode, using object " + urlparts[0]);
-                    sink = createEjbCommandSink(urlparts[0]);
-                    // RMI-Connection
-                } else if(realUrl.startsWith(RMI_IDENTIFIER)) {
+                // RMI-Connection
+                if(realUrl.startsWith(RMI_IDENTIFIER)) {
                     urlparts = split(realUrl.substring(RMI_IDENTIFIER.length()));
                     _logger.info("VJdbc in RMI-Mode, using object " + urlparts[0]);
                     // Examine SSL property
@@ -108,10 +93,6 @@ public final class VirtualDriver implements Driver {
                     }
                     sink = createRmiCommandSink(urlparts[0], useSSL);
                     // Servlet-Connection
-                } else if(realUrl.startsWith(SERVLET_IDENTIFIER)) {
-                    urlparts = split(realUrl.substring(SERVLET_IDENTIFIER.length()));
-                    _logger.info("VJdbc in Servlet-Mode, using URL " + urlparts[0]);
-                    sink = createServletCommandSink(urlparts[0], props);
                 } else {
                     throw new SQLException("Unknown protocol identifier " + realUrl);
                 }
@@ -143,7 +124,8 @@ public final class VirtualDriver implements Driver {
                 // return the new connection
                 result = new VirtualConnection(reg, decosink, props, _cacheEnabled);
             } catch(Exception e) {
-                _logger.error(e);
+                _logger.severe("Other error connecting");
+                e.printStackTrace();
                 throw SQLExceptionHelper.wrap(e);
             }
         }
@@ -182,37 +164,6 @@ public final class VirtualDriver implements Driver {
         CommandSinkRmi rmiSink = broker.createCommandSink();
         CommandSink proxy = new CommandSinkRmiProxy(rmiSink);
         return proxy;
-    }
-
-    private CommandSink createEjbCommandSink(String ejbname) throws Exception {
-        Context ctx = new InitialContext();
-        _logger.info("Lookup " + ejbname);
-        Object ref = ctx.lookup(ejbname);
-        _logger.info("remote bean " + ref.getClass().getName());
-        return (EjbCommandSinkProxy)ref;
-    }
-
-    private CommandSink createServletCommandSink(String url, Properties props) throws Exception {
-        RequestEnhancer requestEnhancer = null;
-
-        String requestEnhancerFactoryClassName = props.getProperty(VJdbcProperties.SERVLET_REQUEST_ENHANCER_FACTORY);
-
-        if(requestEnhancerFactoryClassName != null) {
-            _logger.debug("Found RequestEnhancerFactory class: " + requestEnhancerFactoryClassName);
-            Class requestEnhancerFactoryClass = Class.forName(requestEnhancerFactoryClassName);
-            RequestEnhancerFactory requestEnhancerFactory = (RequestEnhancerFactory)requestEnhancerFactoryClass.newInstance();
-            _logger.debug("RequestEnhancerFactory successfully created");
-            requestEnhancer = requestEnhancerFactory.create();
-        }
-
-        // Decide here if we should use Jakarta-HTTP-Client
-        String useJakartaHttpClient = props.getProperty(VJdbcProperties.SERVLET_USE_JAKARTA_HTTP_CLIENT);
-        if(useJakartaHttpClient != null && useJakartaHttpClient.equals("true")) {
-            return new ServletCommandSinkJakartaHttpClient(url, requestEnhancer);
-        }
-        else {
-            return new ServletCommandSinkJdkHttpClient(url, requestEnhancer);
-        }
     }
 
     // Helper method (can't use the 1.4-Method because support for 1.3 is desired)

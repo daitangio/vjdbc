@@ -4,17 +4,17 @@
 
 package de.simplicit.vjdbc.serial;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 public class Zipper {
-    private static Log _logger = LogFactory.getLog(Zipper.class);
+    private static Logger _logger = Logger.getLogger(Zipper.class.getName());
 
     public static byte[] zip(byte[] b, int compressionMode) throws IOException {
         Deflater deflater = new Deflater(compressionMode);
@@ -32,8 +32,8 @@ public class Zipper {
 
         byte[] zipped = bos.toByteArray();
 
-        if(_logger.isDebugEnabled()) {
-            _logger.debug("Deflated " + b.length + " to " + zipped.length);
+        if(_logger.isLoggable(Level.FINE)) {
+            _logger.fine("Deflated " + b.length + " to " + zipped.length);
         }
 
         return zipped;
@@ -58,8 +58,8 @@ public class Zipper {
 
         byte[] unzipped = bos.toByteArray();
 
-        if(_logger.isDebugEnabled()) {
-            _logger.debug("Inflated " + b.length + " to " + unzipped.length);
+        if(_logger.isLoggable(Level.FINE)) {
+            _logger.fine("Inflated " + b.length + " to " + unzipped.length);
         }
 
         return unzipped;

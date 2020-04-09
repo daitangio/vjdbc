@@ -4,9 +4,9 @@
 
 package de.simplicit.vjdbc.command;
 
+import de.simplicit.vjdbc.server.command.ResultSetHolder;
 import java.sql.*;
 
-import de.simplicit.vjdbc.server.command.ResultSetHolder;
 
 public class JdbcInterfaceType {
     public static final Class[] _interfaces = new Class[] {

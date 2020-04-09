@@ -1,13 +1,13 @@
-<vjdbc-configuration>
+<VJdbcConfiguration>
   <rmi registryPort="2000" remotingPort="2001"/>
-<!--
+  <!--
   <connection 
-	id="mydb"
-	driver="my.db.DriverClass"
-	url="my:jdbc:dbUrl"
-	user="myuser"
-	password="mypassword"
+	id="myConnId"
+	driver="myDriverClass"
+	url="myJdbcUrl"
+	user="myUser"
+	password="myPass"
 	ignoreSQLFeatureNotSupportedExceptions="false"
   />
--->
-</vjdbc-configuration>
+  -->
+</VJdbcConfiguration>

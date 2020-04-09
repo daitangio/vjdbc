@@ -9,15 +9,6 @@ import de.simplicit.vjdbc.VJdbcProperties;
 import de.simplicit.vjdbc.server.DataSourceProvider;
 import de.simplicit.vjdbc.server.LoginHandler;
 
-
-import org.apache.commons.dbcp.ConnectionFactory;
-import org.apache.commons.dbcp.DriverManagerConnectionFactory;
-import org.apache.commons.dbcp.PoolableConnectionFactory;
-import org.apache.commons.dbcp.PoolingDriver;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.pool.impl.GenericObjectPool;
-
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -27,52 +18,68 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.logging.Logger;
 import java.util.zip.Deflater;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlTransient;
 
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ConnectionConfiguration implements Executor {
-	private static Log _logger = LogFactory.getLog(ConnectionConfiguration.class);
-	private static final String DBCP_ID = "jdbc:apache:commons:dbcp:";
+	private static Logger _logger = Logger.getLogger(ConnectionConfiguration.class.getName());
 
 	// Basic properties
+    @XmlAttribute(name="id")
 	protected String _id;
+    @XmlAttribute(name="driver")
 	protected String _driver;
+    @XmlAttribute(name="url")
 	protected String _url;
 	protected String _dataSourceProvider;
+    @XmlAttribute(name="user")
 	protected String _user;
+    @XmlAttribute(name="password")
 	protected String _password;
 	// Trace properties
+    @XmlTransient
 	protected boolean _traceCommandCount = false;
+    @XmlTransient
 	protected boolean _traceOrphanedObjects = false;
 	// Row-Packet size defines the number of rows that is
 	// transported in one packet
+    @XmlTransient
 	protected int _rowPacketSize = 1000;
 	// Encoding for strings
+    @XmlTransient
 	protected String _charset = "ISO-8859-1";
 	// Compression
+    @XmlTransient
 	protected int _compressionMode = Deflater.BEST_SPEED;
+    @XmlTransient
 	protected long _compressionThreshold = 1000;
-	// Connection pooling
-	protected boolean _connectionPooling = true;
-	protected ConnectionPoolConfiguration _connectionPoolConfiguration = null;
 	// Fetch the metadata of a resultset immediately after constructing
+    @XmlTransient
 	protected boolean _prefetchResultSetMetaData = false;
 	// Custom login handler
+    @XmlTransient
 	protected String _loginHandler;
+    @XmlTransient
 	private LoginHandler _loginHandlerInstance = null;
-	// Named queries
-	protected NamedQueryConfiguration _namedQueries;
-	// Query filters
-	protected QueryFilterConfiguration _queryFilters;
         // Ignore SQLFeatureNotSupportedExceptions
+    @XmlAttribute(name="ignoreSQLFeatureNotSupportedExceptions")
         protected boolean _ignoreSQLFeatureNotSupportedExceptions;
 
 	// Connection pooling support
+    @XmlTransient
 	private boolean _driverInitialized = false;
+    @XmlTransient
 	private Boolean _connectionPoolInitialized = Boolean.FALSE;
-	private GenericObjectPool _connectionPool = null;
 	// Thread pooling support
+    @XmlTransient
 	private int _maxThreadPoolSize = 8;
 	// _GG_ Replaced with jdk executors
+    @XmlTransient
 	private ExecutorService _pooledExecutor = Executors.newScheduledThreadPool(_maxThreadPoolSize) ;
 
 
@@ -209,23 +216,6 @@ public class ConnectionConfiguration implements Executor {
 		_compressionThreshold = compressionThreshold;
 	}
 
-	public boolean useConnectionPooling() {
-		return _connectionPooling;
-	}
-
-	public void setConnectionPooling(boolean connectionPooling) {
-		_connectionPooling = connectionPooling;
-	}
-
-	public ConnectionPoolConfiguration getConnectionPoolConfiguration() {
-		return _connectionPoolConfiguration;
-	}
-
-	public void setConnectionPoolConfiguration(ConnectionPoolConfiguration connectionPoolConfiguration) {
-		_connectionPoolConfiguration = connectionPoolConfiguration;
-		_connectionPooling = true;
-	}
-
 	public boolean isPrefetchResultSetMetaData() {
 		return _prefetchResultSetMetaData;
 	}
@@ -242,22 +232,6 @@ public class ConnectionConfiguration implements Executor {
 		_loginHandler = loginHandler;
 	}
 
-	public NamedQueryConfiguration getNamedQueries() {
-		return _namedQueries;
-	}
-
-	public void setNamedQueries(NamedQueryConfiguration namedQueries) {
-		_namedQueries = namedQueries;
-	}
-
-	public QueryFilterConfiguration getQueryFilters() {
-		return _queryFilters;
-	}
-
-	public void setQueryFilters(QueryFilterConfiguration queryFilters) {
-		_queryFilters = queryFilters;
-	}
-
         public boolean isIgnoreSQLFeatureNotSupportedExceptions() {
             return _ignoreSQLFeatureNotSupportedExceptions;
         }
@@ -269,18 +243,8 @@ public class ConnectionConfiguration implements Executor {
 	void validate() throws ConfigurationException {
 		if(_url == null && (_dataSourceProvider == null)) {
 			String msg = "Connection-Entry " + _id + ": neither URL nor DataSourceProvider is provided";
-			_logger.error(msg);
+			_logger.severe(msg);
 			throw new ConfigurationException(msg);
-		}
-
-		// When connection pooling is used, the user/password combination must be
-		// provided in the configuration as otherwise user-accounts are mixed up
-		if(_dataSourceProvider == null) {
-			if(_connectionPooling && _user == null) {
-				String msg = "Connection-Entry " + _id + ": connection pooling can only be used when a dedicated user is specified for the connection";
-				_logger.error(msg);
-				throw new ConfigurationException(msg);
-			}
 		}
 	}
 
@@ -313,24 +277,11 @@ public class ConnectionConfiguration implements Executor {
 		_logger.info("  Charset .................... " + _charset);
 		_logger.info("  Compression ................ " + getCompressionMode());
 		_logger.info("  Compression-Thrs ........... " + _compressionThreshold + " bytes");
-		_logger.info("  Connection-Pool ............ " + (_connectionPooling ? "on" : "off"));
 		_logger.info("  Pre-Fetch ResultSetMetaData  " + (_prefetchResultSetMetaData ? "on" : "off"));
 		_logger.info("  Login-Handler .............. " + (_loginHandler != null ? _loginHandler : "none"));
 		_logger.info("  Trace Command-Counts ....... " + _traceCommandCount);
 		_logger.info("  Trace Orphaned-Objects ..... " + _traceOrphanedObjects);
         _logger.info("  Ignore SQL Feature Errors... " + _ignoreSQLFeatureNotSupportedExceptions);
-
-		if(_connectionPoolConfiguration != null) {
-			_connectionPoolConfiguration.log();
-		}
-
-		if(_namedQueries != null) {
-			_namedQueries.log();
-		}
-
-		if(_queryFilters != null) {
-			_queryFilters.log();
-		}
 	}
 
 	public Connection create(Properties props) throws SQLException, VJdbcException {
@@ -346,31 +297,34 @@ public class ConnectionConfiguration implements Executor {
 	protected Connection createConnectionViaDataSource() throws SQLException {
 		Connection result;
 
-		_logger.debug("Creating DataSourceFactory from class " + _dataSourceProvider);
+		_logger.fine("Creating DataSourceFactory from class " + _dataSourceProvider);
 
 		try {
 			Class clsDataSourceProvider = Class.forName(_dataSourceProvider);
 			DataSourceProvider dataSourceProvider = (DataSourceProvider) clsDataSourceProvider.newInstance();
-			_logger.debug("DataSourceProvider created");
+			_logger.fine("DataSourceProvider created");
 			DataSource dataSource = dataSourceProvider.getDataSource();
-			_logger.debug("Retrieving connection from DataSource");
+			_logger.fine("Retrieving connection from DataSource");
 			if(_user != null) {
 				result = dataSource.getConnection(_user, _password);
 			} else {
 				result = dataSource.getConnection();
 			}
-			_logger.debug("... Connection successfully retrieved");
+			_logger.fine("... Connection successfully retrieved");
 		} catch (ClassNotFoundException e) {
 			String msg = "DataSourceProvider-Class " + _dataSourceProvider + " not found";
-			_logger.error(msg, e);
+			_logger.severe(msg);
+            e.printStackTrace();
 			throw new SQLException(msg);
 		} catch (InstantiationException e) {
 			String msg = "Failed to create DataSourceProvider";
-			_logger.error(msg, e);
+			_logger.severe(msg);
+            e.printStackTrace();
 			throw new SQLException(msg);
 		} catch (IllegalAccessException e) {
 			String msg = "Can't access DataSourceProvider";
-			_logger.error(msg, e);
+			_logger.severe(msg);
+            e.printStackTrace();
 			throw new SQLException(msg);
 		}
 
@@ -381,12 +335,13 @@ public class ConnectionConfiguration implements Executor {
 		// Try to load the driver
 		if(!_driverInitialized && _driver != null) {
 			try {
-				_logger.debug("Loading driver " + _driver);
+				_logger.fine("Loading driver " + _driver);
 				Class.forName(_driver).newInstance();
-				_logger.debug("... successful");
+				_logger.fine("... successful");
 			} catch (Exception e) {
 				String msg = "Loading of driver " + _driver + " failed";
-				_logger.error(msg, e);
+                _logger.severe(msg);
+                e.printStackTrace();
 				throw new SQLException(msg);
 			}
 			_driverInitialized = true;
@@ -395,64 +350,23 @@ public class ConnectionConfiguration implements Executor {
 		// When database login is provided use them for the login instead of the
 		// ones provided by the client
 		if(_user != null) {
-			_logger.debug("Using " + _user + " for database-login");
+			_logger.fine("Using " + _user + " for database-login");
 			props.put("user", _user);
 			if(_password != null) {
 				props.put("password", _password);
 			} else {
-				_logger.warn("No password was provided for database-login " + _user);
+				_logger.warning("No password was provided for database-login " + _user);
 			}
 		}
 
 		String jdbcurl = _url;
 
 		if(jdbcurl.length() > 0) {
-			_logger.debug("JDBC-Connection-String: " + jdbcurl);
+			_logger.fine("JDBC-Connection-String: " + jdbcurl);
 		} else {
 			String msg = "No JDBC-Connection-String available";
-			_logger.error(msg);
+			_logger.severe(msg);
 			throw new SQLException(msg);
-		}
-
-		// Connection pooling with DBCP
-		if(_connectionPooling && _connectionPoolInitialized != null) {
-			String dbcpId = DBCP_ID + _id;
-
-			if(_connectionPool != null) {
-				jdbcurl = dbcpId;
-			} else {
-				try {
-					// Try to load the DBCP-Driver
-					Class.forName("org.apache.commons.dbcp.PoolingDriver");
-					// Populate configuration object
-					if(_connectionPoolConfiguration != null) {
-						GenericObjectPool.Config poolConfig = new GenericObjectPool.Config();
-						poolConfig.maxActive = _connectionPoolConfiguration.getMaxActive();
-						poolConfig.maxIdle = _connectionPoolConfiguration.getMaxIdle();
-						poolConfig.maxWait = _connectionPoolConfiguration.getMaxWait();
-						poolConfig.minIdle = _connectionPoolConfiguration.getMinIdle();
-						poolConfig.minEvictableIdleTimeMillis = _connectionPoolConfiguration.getMinEvictableIdleTimeMillis();
-						poolConfig.timeBetweenEvictionRunsMillis = _connectionPoolConfiguration.getTimeBetweenEvictionRunsMillis();
-						_connectionPool = new LoggingGenericObjectPool(_id, poolConfig);
-					}
-					else {
-						_connectionPool = new LoggingGenericObjectPool(_id);
-					}
-
-					ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(jdbcurl, props);
-					new PoolableConnectionFactory(connectionFactory, _connectionPool, null, null, false, true);
-					PoolingDriver driver = (PoolingDriver) DriverManager.getDriver(DBCP_ID);
-					// Register pool with connection id
-					driver.registerPool(_id, _connectionPool);
-					_connectionPoolInitialized = Boolean.TRUE;
-					jdbcurl = dbcpId;
-					_logger.debug("Connection-Pooling successfully initialized for connection " + _id);
-				} catch (ClassNotFoundException e) {
-					_connectionPool = null;
-					_connectionPoolInitialized = null;
-					_logger.error("Jakarta-DBCP-Driver not found, switching it off for connection " + _id, e);
-				}
-			}
 		}
 
 		return DriverManager.getConnection(jdbcurl, props);
@@ -460,7 +374,7 @@ public class ConnectionConfiguration implements Executor {
 
 	protected void checkLogin(Properties props) throws VJdbcException {
 		if(_loginHandler != null) {
-			_logger.debug("Trying to login ...");
+			_logger.fine("Trying to login ...");
 
 			if(_loginHandlerInstance == null) {
 				try {
@@ -468,15 +382,18 @@ public class ConnectionConfiguration implements Executor {
 					_loginHandlerInstance = (LoginHandler) loginHandlerClazz.newInstance();
 				} catch (ClassNotFoundException e) {
 					String msg = "Login-Handler class not found";
-					_logger.error(msg, e);
+                    _logger.severe(msg);
+                    e.printStackTrace();
 					throw new VJdbcException(msg, e);
 				} catch (InstantiationException e) {
 					String msg = "Error creating instance of Login-Handler class";
-					_logger.error(msg, e);
+                    _logger.severe(msg);
+                    e.printStackTrace();
 					throw new VJdbcException(msg, e);
 				} catch (IllegalAccessException e) {
 					String msg = "Error creating instance of Login-Handler class";
-					_logger.error(msg, e);
+                    _logger.severe(msg);
+                    e.printStackTrace();
 					throw new VJdbcException(msg, e);
 				}
 			}
@@ -485,16 +402,16 @@ public class ConnectionConfiguration implements Executor {
 			String loginPassword = props.getProperty(VJdbcProperties.LOGIN_PASSWORD);
 
 			if(loginUser == null) {
-				_logger.warn("Property vjdbc.login.user is not set, " + "the login-handler might not be satisfied");
+				_logger.warning("Property vjdbc.login.user is not set, " + "the login-handler might not be satisfied");
 			}
 
 			if(loginPassword == null) {
-				_logger.warn("Property vjdbc.login.password is not set, " + "the login-handler might not be satisfied");
+				_logger.warning("Property vjdbc.login.password is not set, " + "the login-handler might not be satisfied");
 			}
 
 			_loginHandlerInstance.checkLogin(loginUser, loginPassword);
 
-			_logger.debug("... successful");
+			_logger.fine("... successful");
 		}
 	}
 

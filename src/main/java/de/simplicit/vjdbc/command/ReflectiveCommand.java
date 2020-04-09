@@ -4,8 +4,6 @@
 
 package de.simplicit.vjdbc.command;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import de.simplicit.vjdbc.util.SQLExceptionHelper;
 
@@ -16,11 +14,12 @@ import java.io.ObjectOutput;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 public class ReflectiveCommand implements Command, Externalizable {
     static final long serialVersionUID = 1573361368678688726L;
 
-    private static Log _logger = LogFactory.getLog(ReflectiveCommand.class);
+    private static Logger _logger = Logger.getLogger(ReflectiveCommand.class.getName());
     private static final Object[] _zeroParameters = new Object[0];
 
     private int _interfaceType;
@@ -73,29 +72,33 @@ public class ReflectiveCommand implements Command, Externalizable {
             return method.invoke(target, _parameters);
         } catch(NoSuchMethodException e) {
             String msg = "No such method '" + _cmd + "' on object " + target + " (Target-Class " + _targetClass.getName() + ")";
-            _logger.warn(msg);
-            _logger.warn(getParameterTypesAsString());
+            _logger.warning(msg);
+            _logger.warning(getParameterTypesAsString());
             throw SQLExceptionHelper.wrap(e);
         } catch(SecurityException e) {
             String msg = "Security exception with '" + _cmd + "' on object " + target;
-            _logger.error(msg, e);
+            _logger.severe(msg);
+            e.printStackTrace();
             throw SQLExceptionHelper.wrap(e);
         } catch(IllegalAccessException e) {
             String msg = "Illegal access exception with '" + _cmd + "' on object " + target;
-            _logger.error(msg, e);
+            _logger.severe(msg);
+            e.printStackTrace();
             throw SQLExceptionHelper.wrap(e);
         } catch(IllegalArgumentException e) {
             String msg = "Illegal argument exception with '" + _cmd + "' on object " + target;
-            _logger.error(msg, e);
+            _logger.severe(msg);
+            e.printStackTrace();
             throw SQLExceptionHelper.wrap(e);
         } catch(InvocationTargetException e) {
             Throwable targetException = e.getTargetException();
             String msg = "Unexpected invocation target exception: " + targetException.toString();
-            _logger.warn(msg, targetException);
+            _logger.warning(msg);
             throw SQLExceptionHelper.wrap(targetException);
         } catch(Exception e) {
             String msg = "Unexpected exception: " + e.toString();
-            _logger.error(msg, e);
+            _logger.severe(msg);
+            e.printStackTrace();
             throw SQLExceptionHelper.wrap(e);
         }
     }

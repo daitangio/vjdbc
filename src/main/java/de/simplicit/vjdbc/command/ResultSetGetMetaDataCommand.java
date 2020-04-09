@@ -4,8 +4,8 @@
 
 package de.simplicit.vjdbc.command;
 
-import de.simplicit.vjdbc.server.command.ResultSetHolder;
 
+import de.simplicit.vjdbc.server.command.ResultSetHolder;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
