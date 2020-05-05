@@ -4,18 +4,29 @@
 
 package de.simplicit.vjdbc.server.config;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.logging.Logger;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlTransient;
 
+@XmlAccessorType(XmlAccessType.FIELD)
 public class RmiConfiguration {
-    private static Log _logger = LogFactory.getLog(RmiConfiguration.class);
+    private static Logger _logger = Logger.getLogger(RmiConfiguration.class.getName());
 
+    @XmlAttribute(name = "objectName")
     protected String _objectName = "VJdbc";
+    @XmlAttribute(name = "registryPort")
     protected int _registryPort = 2000;
+    @XmlAttribute(name = "remotingPort")
     protected int _remotingPort = 0;
+    @XmlTransient
     protected boolean _createRegistry = true;
+    @XmlTransient
     protected boolean _useSSL = false;
+    @XmlTransient
     protected String _rmiClientSocketFactory = null;
+    @XmlTransient
     protected String _rmiServerSocketFactory = null;
 
     public RmiConfiguration() {

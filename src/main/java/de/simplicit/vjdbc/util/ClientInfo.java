@@ -4,15 +4,14 @@
 
 package de.simplicit.vjdbc.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.net.InetAddress;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
 
 public class ClientInfo {
-    private static Log _logger = LogFactory.getLog(ClientInfo.class);
+    private static Logger _logger = Logger.getLogger(ClientInfo.class.getName());
     private static Properties _properties = null;
 
     public static Properties getProperties(String propertiesToTransfer) {

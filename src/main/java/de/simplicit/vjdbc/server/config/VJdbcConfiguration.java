@@ -1,283 +1,77 @@
-// VJDBC - Virtual JDBC
-// Written by Michael Link
-// Website: http://vjdbc.sourceforge.net
-
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package de.simplicit.vjdbc.server.config;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-
-import org.apache.commons.digester.Digester;
-import org.apache.commons.digester.substitution.MultiVariableExpander;
-import org.apache.commons.digester.substitution.VariableSubstitutor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.xml.sax.SAXException;
+import javax.xml.bind.annotation.*;
 
 /**
- * Root configuration class. Can be initialized with different input objects
- * or be built up programmatically.
+<vjdbc-configuration> 
+  <rmi registryPort="2000" remotingPort="2001"/>
+  <connection 
+	id="mydb"
+	driver="my.db.DriverClass"
+	url="my:jdbc:dbUrl"
+	user="myuser"
+	password="mypassword"
+	ignoreSQLFeatureNotSupportedExceptions="false"
+  />
+</vjdbc-configuration>
+* @author JerrySmith
  */
+@XmlRootElement(name = "VJdbcConfiguration")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class VJdbcConfiguration {
-    private static Log _logger = LogFactory.getLog(VJdbcConfiguration.class);
-    private static VJdbcConfiguration _singleton;
-
-    private OcctConfiguration _occtConfiguration = new OcctConfiguration();
-    private RmiConfiguration _rmiConfiguration;
-    private List _connections = new ArrayList();
-    private static boolean useStreamingResultSet = true;
-
-    /**
-     * overrides the use of the StreamingResultSet to allow other types of
-     * result set network transport.
-     *
-     * Don't call this method unless you are defining your own network
-     * transport which has it own mechanism for transporting result sets
-     */
-    public static void setUseCustomResultSetHandling() {
-        useStreamingResultSet = false;
-    }
-
-    public static boolean getUseCustomResultSetHandling() {
-        return useStreamingResultSet;
-    }
-
-
-    /**
-     * Initialization with pre-built configuration object.
-     * @param customConfig
-     */
-    public static void init(VJdbcConfiguration customConfig) {
-        if(_singleton != null) {
-            _logger.warn("VJdbcConfiguration already initialized, init-Call is ignored");
-        } else {
-            _singleton = customConfig;
-        }
-    }
-
-    /**
-     * Initialization with resource.
-     * @param configResource Resource to be loaded by the ClassLoader
-     * @throws ConfigurationException
-     */
-    public static void init(String configResource) throws ConfigurationException {
-        init(configResource, null);
-    }
-
-    /**
-     * Initialization with resource.
-     * @param configResource Resource to be loaded by the ClassLoader
-     * @throws ConfigurationException
-     */
-    public static void init(String configResource, Properties configVariables) throws ConfigurationException {
-        if(_singleton != null) {
-            _logger.warn("VJdbcConfiguration already initialized, init-Call is ignored");
-        } else {
-            try {
-                _singleton = new VJdbcConfiguration(configResource, configVariables);
-                if(_logger.isInfoEnabled()) {
-                    _singleton.log();
-                }
-            } catch(Exception e) {
-                String msg = "VJdbc-Configuration failed";
-                _logger.error(msg, e);
-                throw new ConfigurationException(msg, e);
-            }
-        }
-    }
-
-    /**
-     * Initialization with pre-opened InputStream.
-     * @param configResourceInputStream InputStream
-     * @throws ConfigurationException
-     */
-    public static void init(InputStream configResourceInputStream, Properties configVariables) throws ConfigurationException {
-        if(_singleton != null) {
-            _logger.warn("VJdbcConfiguration already initialized, init-Call is ignored");
-        } else {
-            try {
-                _singleton = new VJdbcConfiguration(configResourceInputStream, configVariables);
-                if(_logger.isInfoEnabled()) {
-                    _singleton.log();
-                }
-            } catch(Exception e) {
-                String msg = "VJdbc-Configuration failed";
-                _logger.error(msg, e);
-                throw new ConfigurationException(msg, e);
-            }
-        }
-    }
-
-    /**
-     * Accessor method to the configuration singleton.
-     * @return Configuration object
-     * @throws RuntimeException Thrown when accessing without being initialized
-     * previously
-     */
+    private static VJdbcConfiguration singleton;
+    
     public static VJdbcConfiguration singleton() {
-        if(_singleton == null) {
-            throw new RuntimeException("VJdbc-Configuration is not initialized !");
-        }
-        return _singleton;
+        return singleton;
+    }
+    
+    public static void set(VJdbcConfiguration s) {
+        singleton = s;
+    }
+    
+    @XmlElement(name = "occt")
+    private OcctConfiguration occt = new OcctConfiguration();
+    @XmlElement(name = "connection")
+    private ConnectionConfiguration connection = new ConnectionConfiguration();
+    @XmlElement(name = "rmi")
+    private RmiConfiguration rmi = new RmiConfiguration();
+    
+    private boolean useCustomResultSetHandling = true;
+    
+    public OcctConfiguration getOcct() {
+        return occt;
     }
 
-    /**
-     * Constructor. Can be used for programmatical building the Configuration object.
-     */
-    public VJdbcConfiguration() {
+    public void setOcct(OcctConfiguration occt) {
+        this.occt = occt;
     }
 
-    public OcctConfiguration getOcctConfiguration() {
-        return _occtConfiguration;
+    public ConnectionConfiguration getConnection() {
+        return connection;
     }
 
-    public void setOcctConfiguration(OcctConfiguration occtConfiguration) {
-        _occtConfiguration = occtConfiguration;
+    public void setConnection(ConnectionConfiguration connection) {
+        this.connection = connection;
     }
 
-    /**
-     * Returns the RMI-Configuration.
-     * @return RmiConfiguration object or null
-     */
-    public RmiConfiguration getRmiConfiguration() {
-        return _rmiConfiguration;
+    public RmiConfiguration getRmi() {
+        return rmi;
     }
 
-    /**
-     * Sets the RMI-Configuration object.
-     * @param rmiConfiguration RmiConfiguration object to be used.
-     */
-    public void setRmiConfiguration(RmiConfiguration rmiConfiguration) {
-        _rmiConfiguration = rmiConfiguration;
+    public void setRmi(RmiConfiguration rmi) {
+        this.rmi = rmi;
     }
 
-    /**
-     * Returns a ConnectionConfiguration for a specific identifier.
-     * @param name Identifier of the ConnectionConfiguration
-     * @return ConnectionConfiguration or null
-     */
-    public ConnectionConfiguration getConnection(String name) {
-        for(Iterator it = _connections.iterator(); it.hasNext();) {
-            ConnectionConfiguration connectionConfiguration = (ConnectionConfiguration)it.next();
-            if(connectionConfiguration.getId().equals(name)) {
-                return connectionConfiguration;
-            }
-        }
-        return null;
+    public boolean isUseCustomResultSetHandling() {
+        return useCustomResultSetHandling;
     }
 
-    /**
-     * Adds a ConnectionConfiguration.
-     * @param connectionConfiguration
-     * @throws ConfigurationException Thrown when the connection identifier already exists
-     */
-    public void addConnection(ConnectionConfiguration connectionConfiguration) throws ConfigurationException {
-        if(getConnection(connectionConfiguration.getId()) == null) {
-            _connections.add(connectionConfiguration);
-        } else {
-            String msg = "Connection configuration for " + connectionConfiguration.getId() + " already exists";
-            _logger.error(msg);
-            throw new ConfigurationException(msg);
-        }
-    }
-
-    private VJdbcConfiguration(InputStream configResource, Properties vars) throws IOException, SAXException, ConfigurationException {
-        Digester digester = createDigester(vars);
-        digester.parse(configResource);
-        validateConnections();
-    }
-
-    private VJdbcConfiguration(String configResource, Properties vars) throws IOException, SAXException, ConfigurationException {
-        Digester digester = createDigester(vars);
-        digester.parse(configResource);
-        validateConnections();
-    }
-
-    private Digester createDigester(Properties vars) {
-        Digester digester = createDigester();
-
-        if(vars != null) {
-            MultiVariableExpander expander = new MultiVariableExpander();
-            expander.addSource("$", vars);
-            digester.setSubstitutor(new VariableSubstitutor(expander));
-        }
-
-        return digester;
-    }
-
-    private void validateConnections() throws ConfigurationException {
-        // Call the validation method of the configuration
-        for(Iterator it = _connections.iterator(); it.hasNext();) {
-            ConnectionConfiguration connectionConfiguration = (ConnectionConfiguration)it.next();
-            connectionConfiguration.validate();
-        }
-    }
-
-    private Digester createDigester() {
-        Digester digester = new Digester();
-
-        digester.push(this);
-
-        digester.addObjectCreate("vjdbc-configuration/occt", DigesterOcctConfiguration.class);
-        digester.addSetProperties("vjdbc-configuration/occt");
-        digester.addSetNext("vjdbc-configuration/occt",
-                "setOcctConfiguration",
-                OcctConfiguration.class.getName());
-
-        digester.addObjectCreate("vjdbc-configuration/rmi", DigesterRmiConfiguration.class);
-        digester.addSetProperties("vjdbc-configuration/rmi");
-        digester.addSetNext("vjdbc-configuration/rmi",
-                "setRmiConfiguration",
-                RmiConfiguration.class.getName());
-
-        digester.addObjectCreate("vjdbc-configuration/connection", DigesterConnectionConfiguration.class);
-        digester.addSetProperties("vjdbc-configuration/connection");
-        digester.addSetNext("vjdbc-configuration/connection",
-                "addConnection",
-                ConnectionConfiguration.class.getName());
-
-        digester.addObjectCreate("vjdbc-configuration/connection/connection-pool", ConnectionPoolConfiguration.class);
-        digester.addSetProperties("vjdbc-configuration/connection/connection-pool");
-        digester.addSetNext("vjdbc-configuration/connection/connection-pool",
-                "setConnectionPoolConfiguration",
-                ConnectionPoolConfiguration.class.getName());
-
-        // Named-Queries
-        digester.addObjectCreate("vjdbc-configuration/connection/named-queries", NamedQueryConfiguration.class);
-        digester.addCallMethod("vjdbc-configuration/connection/named-queries/entry", "addEntry", 2);
-        digester.addCallParam("vjdbc-configuration/connection/named-queries/entry", 0, "id");
-        digester.addCallParam("vjdbc-configuration/connection/named-queries/entry", 1);
-        digester.addSetNext("vjdbc-configuration/connection/named-queries",
-                "setNamedQueries",
-                NamedQueryConfiguration.class.getName());
-
-        // Query-Filters
-        digester.addObjectCreate("vjdbc-configuration/connection/query-filters", QueryFilterConfiguration.class);
-        digester.addCallMethod("vjdbc-configuration/connection/query-filters/deny", "addDenyEntry", 2);
-        digester.addCallParam("vjdbc-configuration/connection/query-filters/deny", 0);
-        digester.addCallParam("vjdbc-configuration/connection/query-filters/deny", 1, "type");
-        digester.addCallMethod("vjdbc-configuration/connection/query-filters/allow", "addAllowEntry", 2);
-        digester.addCallParam("vjdbc-configuration/connection/query-filters/allow", 0);
-        digester.addCallParam("vjdbc-configuration/connection/query-filters/allow", 1, "type");
-        digester.addSetNext("vjdbc-configuration/connection/query-filters",
-                "setQueryFilters",
-                QueryFilterConfiguration.class.getName());
-
-        return digester;
-    }
-
-    private void log() {
-        if(_rmiConfiguration != null) {
-            _rmiConfiguration.log();
-        }
-        _occtConfiguration.log();
-        for(Iterator it = _connections.iterator(); it.hasNext();) {
-            ConnectionConfiguration connectionConfiguration = (ConnectionConfiguration)it.next();
-            connectionConfiguration.log();
-        }
+    public void setUseCustomResultSetHandling(boolean useCustomResultSetHandling) {
+        this.useCustomResultSetHandling = useCustomResultSetHandling;
     }
 }

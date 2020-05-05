@@ -8,12 +8,11 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import de.simplicit.vjdbc.serial.RowPacket;
 import de.simplicit.vjdbc.serial.SerializableTransport;
 import de.simplicit.vjdbc.server.config.ConnectionConfiguration;
+import java.util.logging.Logger;
 
 /**
  * The ResultSetHolder is responsible to hold a reference to an open ResultSet.
@@ -21,7 +20,7 @@ import de.simplicit.vjdbc.server.config.ConnectionConfiguration;
  * result when nextRowPacket is called.
  */
 public class ResultSetHolder {
-	private static Log _logger = LogFactory.getLog(ResultSetHolder.class);
+	private static Logger _logger = Logger.getLogger(ResultSetHolder.class.getName());
 
 	private final Object _lock = new Object();
 	private boolean _readerThreadIsRunning = false;
@@ -68,7 +67,8 @@ public class ResultSetHolder {
 					String msg = "Reader thread interrupted unexpectedly";
 					// Some unexpected exception occured, we must leave the loop here as the
 					// termination flag might not be reset to false.
-					_logger.error(msg, e);
+					_logger.severe(msg);
+                    e.printStackTrace();
 					_lastOccurredException = new SQLException(msg);
 					break;
 				}

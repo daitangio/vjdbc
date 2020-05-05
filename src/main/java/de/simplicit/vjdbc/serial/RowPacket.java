@@ -5,8 +5,6 @@
 package de.simplicit.vjdbc.serial;
 
 import de.simplicit.vjdbc.util.JavaVersionInfo;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -14,6 +12,8 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A RowPacket contains the data of a part (or a whole) JDBC-ResultSet.
@@ -23,7 +23,7 @@ public class RowPacket implements Externalizable {
     private static final int DEFAULT_ARRAY_SIZE = 100;
     static final long serialVersionUID = 6366194574502000718L;
 
-    private static Log _logger = LogFactory.getLog(RowPacket.class);
+    private static Logger _logger = Logger.getLogger(RowPacket.class.getName());
 
     private int _rowCount = 0;
     private boolean _forwardOnly = false;
@@ -257,8 +257,8 @@ public class RowPacket implements Externalizable {
         for(int i = 1; i <= columnCount; i++) {
             int columnType = _columnTypes[i - 1] = metaData.getColumnType(i);
 
-            if(_logger.isDebugEnabled()) {
-                _logger.debug("Column-Type " + i + ": " + metaData.getColumnType(i));
+            if(_logger.isLoggable(Level.FINE)) {
+                _logger.fine("Column-Type " + i + ": " + metaData.getColumnType(i));
             }
 
             Class componentType = null;

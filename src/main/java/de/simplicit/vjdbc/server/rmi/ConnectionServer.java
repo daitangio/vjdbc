@@ -7,21 +7,20 @@ package de.simplicit.vjdbc.server.rmi;
 import de.simplicit.vjdbc.rmi.SecureSocketFactory;
 import de.simplicit.vjdbc.server.config.RmiConfiguration;
 import de.simplicit.vjdbc.server.config.VJdbcConfiguration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.BasicConfigurator;
+import java.io.File;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMISocketFactory;
-import java.util.Properties;
+import java.util.logging.Logger;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
 
 public class ConnectionServer {
-	private static Log _logger = LogFactory.getLog(ConnectionServer.class);
+	private static Logger _logger = Logger.getLogger(ConnectionServer.class.getName());
 
 	private RmiConfiguration _rmiConfiguration;
 	private Registry _registry;
@@ -34,21 +33,10 @@ public class ConnectionServer {
 		try {
 			//BasicConfigurator.configure();
 			if(args.length == 1) {
-				VJdbcConfiguration.init(args[0]);
-			} else if(args.length == 2) {
-				// Second argument is a properties file with variables that are
-				// replaced by Digester when the configuration is read in
-				Properties props = new Properties();
-				FileInputStream propsInputStream = null;
-				try {
-					propsInputStream = new FileInputStream(args[1]);
-					props.load(propsInputStream);
-					VJdbcConfiguration.init(args[0], props);
-				} finally {
-					if(propsInputStream != null) {
-						propsInputStream.close();
-					}
-				}
+                JAXBContext jaxbContext = JAXBContext.newInstance(VJdbcConfiguration.class);
+                Unmarshaller vjdbcUnmarshaller = jaxbContext.createUnmarshaller();
+                VJdbcConfiguration conf = (VJdbcConfiguration)vjdbcUnmarshaller.unmarshal(new File(args[0]));
+                VJdbcConfiguration.set(conf);
 			} else {
 				throw new RuntimeException("You must specify a configuration file as the first parameter");
 			}
@@ -56,7 +44,8 @@ public class ConnectionServer {
 			ConnectionServer connectionServer = new ConnectionServer();
 			connectionServer.serve();
 		} catch (Throwable e) {
-			_logger.error(e.getMessage(), e);
+			_logger.severe(e.getMessage());
+            e.printStackTrace();
 		}
 	}
 
@@ -64,10 +53,10 @@ public class ConnectionServer {
 	}
 
 	public void serve() throws IOException {
-		_rmiConfiguration = VJdbcConfiguration.singleton().getRmiConfiguration();
+		_rmiConfiguration = VJdbcConfiguration.singleton().getRmi();
 
 		if(_rmiConfiguration == null) {
-			_logger.debug("No RMI-Configuration specified in VJdbc-Configuration, using default configuration");
+			_logger.fine("No RMI-Configuration specified in VJdbc-Configuration, using default configuration");
 			_rmiConfiguration = new RmiConfiguration();
 		}
 
@@ -99,9 +88,11 @@ public class ConnectionServer {
 					_logger.info("Unbinding remote object");
 					_registry.unbind(_rmiConfiguration.getObjectName());
 				} catch (RemoteException e) {
-					_logger.error("Remote exception", e);
+					_logger.severe("Remote exception");
+                    e.printStackTrace();
 				} catch (NotBoundException e) {
-					_logger.error("Not bound exception", e);
+					_logger.severe("Not bound exception");
+                    e.printStackTrace();
 				}
 			}
 		}));

@@ -9,17 +9,16 @@ import de.simplicit.vjdbc.command.*;
 import de.simplicit.vjdbc.serial.*;
 import de.simplicit.vjdbc.util.ClientInfo;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.sql.*;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.Executor;
+import java.util.logging.Logger;
+
 
 public class VirtualConnection extends VirtualBase implements Connection {
-	private static Log _logger = LogFactory.getLog(VirtualConnection.class);
+	private static Logger _logger = Logger.getLogger(VirtualConnection.class.getName());
 
 	private static TableCache s_tableCache;
 	private boolean _cachingEnabled = false;
@@ -67,7 +66,7 @@ public class VirtualConnection extends VirtualBase implements Connection {
 					try {
 						s_tableCache = new TableCache(this, cachedTables);
 					} catch(SQLException e) {
-						_logger.error("Creation of table cache failed, disable caching", e);
+						_logger.severe("Creation of table cache failed, disable caching");
 						_cachingEnabled = false;
 					}
 				}
@@ -383,7 +382,8 @@ public class VirtualConnection extends VirtualBase implements Connection {
 				_sink.processWithBooleanResult(_objectUid, CommandPool.getReflectiveCommand(JdbcInterfaceType.CONNECTION, "isValid", args, 2));
 				finished = true;
 			} catch (SQLException sqle) {
-				_logger.info(sqle.getMessage(), sqle);
+				_logger.severe(sqle.getMessage());
+                sqle.printStackTrace();
 			}
 		}
 	}
@@ -505,7 +505,8 @@ public class VirtualConnection extends VirtualBase implements Connection {
 				try {
 					close();
 				} catch (SQLException e) {
-					_logger.info(e.getMessage(), e);
+					_logger.severe(e.getMessage());
+                    e.printStackTrace();
 				}
 			}
 		};
